@@ -18,6 +18,13 @@ export const addressType = defineType({
       name: "email",
       title: "User Email",
       type: "email",
+      validation: (Rule) => Rule.required(),
+    }),
+    defineField({
+      name: "clerkUserId",
+      title: "Clerk User ID",
+      type: "string",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "address",
@@ -33,29 +40,39 @@ export const addressType = defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "phone",
+      title: "Phone Number",
+      type: "string",
+      validation: (Rule) =>
+        Rule.required().regex(/^[0-9+() -]{8,20}$/, {
+          name: "phone",
+          invert: false,
+        }),
+    }),
+    defineField({
       name: "state",
       title: "State",
       type: "string",
-      description: "Two letter state code (e.g. NY, CA)",
-      validation: (Rule) => Rule.required().length(2).uppercase(),
+      description: "State/Region/Province",
+      validation: (Rule) => Rule.required().min(2).max(50),
     }),
     defineField({
       name: "zip",
-      title: "ZIP Code",
+      title: "Postal Code",
       type: "string",
-      description: "Format: 12345 or 12345-6789",
+      description: "Example: 12345, 10000-1234, 75001",
       validation: (Rule) =>
         Rule.required()
-          .regex(/^\d{5}(-\d{4})?$/, {
-            name: "zipCode",
+          .regex(/^[A-Za-z0-9 -]{3,12}$/, {
+            name: "postalCode",
             invert: false,
           })
-          .custom((zip: string | undefined) => {
-            if (!zip) {
-              return "ZIP code is required";
+          .custom((postalCode: string | undefined) => {
+            if (!postalCode) {
+              return "Postal code is required";
             }
-            if (!zip.match(/^\d{5}(-\d{4})?$/)) {
-              return "Please enter a valid ZIP code (e.g. 12345 or 12345-6789)";
+            if (!postalCode.match(/^[A-Za-z0-9 -]{3,12}$/)) {
+              return "Please enter a valid postal code";
             }
             return true;
           }),

@@ -27,6 +27,11 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
   onClose,
 }) => {
   if (!order) return null;
+  const orderExt = order as MY_ORDERS_QUERYResult[number] & {
+    paymentStatus?: string;
+    paymentMethod?: string;
+    address?: { phone?: string };
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl! max-h-[90vh] overflow-y-scroll">
@@ -49,6 +54,20 @@ const OrderDetailDialog: React.FC<OrderDetailsDialogProps> = ({
             <span className="capitalize text-green-600 font-medium">
               {order.status}
             </span>
+          </p>
+          <p>
+            <strong>Payment Status:</strong>{" "}
+            <span className="capitalize text-blue-600 font-medium">
+              {orderExt.paymentStatus || "pending"}
+            </span>
+          </p>
+          <p>
+            <strong>Payment Method:</strong>{" "}
+            <span className="capitalize">{orderExt.paymentMethod || "cmi_card"}</span>
+          </p>
+          <p>
+            <strong>Phone:</strong>{" "}
+            {orderExt.address?.phone || "N/A"}
           </p>
           <p>
             <strong>Invoice Number:</strong> {order?.invoice?.number}

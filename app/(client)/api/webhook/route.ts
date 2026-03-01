@@ -1,5 +1,5 @@
 import { Metadata } from "@/actions/createCheckoutSession";
-import stripe from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { backendClient } from "@/sanity/lib/backendClient";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
   }
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!webhookSecret) {
-    console.log("Stripe webhook secret is not set");
+    console.error("Stripe webhook secret is not set");
     return NextResponse.json(
       {
         error: "Stripe webhook secret is not set",
@@ -26,6 +26,17 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
+  let stripe: Stripe;
+  try {
+    stripe = getStripe();
+  } catch (error) {
+    console.error("Stripe client initialization failed:", error);
+    return NextResponse.json(
+      { error: "Stripe client initialization failed" },
+      { status: 500 }
+    );
+  }
+
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
@@ -33,7 +44,7 @@ export async function POST(req: NextRequest) {
     console.error("Webhook signature verification failed:", error);
     return NextResponse.json(
       {
-        error: `Webhook Error: ${error}`,
+        error: "Webhook signature verification failed",
       },
       { status: 400 }
     );
@@ -64,6 +75,17 @@ async function createOrderInSanity(
   session: Stripe.Checkout.Session,
   invoice: Stripe.Invoice | null
 ) {
+  const stripe = getStripe();
+
+  const existingOrderId = await backendClient.fetch<string | null>(
+    `*[_type == "order" && stripeCheckoutSessionId == $sessionId][0]._id`,
+    { sessionId: session.id }
+  );
+
+  if (existingOrderId) {
+    return null;
+  }
+
   const {
     id,
     amount_total,
@@ -72,8 +94,23 @@ async function createOrderInSanity(
     payment_intent,
     total_details,
   } = session;
-  const { orderNumber, customerName, customerEmail, clerkUserId, address } =
-    metadata as unknown as Metadata & { address: string };
+  const {
+    orderNumber,
+    customerName,
+    customerEmail,
+    clerkUserId,
+    address,
+    paymentMethod,
+    promoCode,
+    promoDiscount,
+    installmentMonths,
+  } = metadata as unknown as Metadata & {
+    address: string;
+    paymentMethod?: "cod" | "cmi_card" | "installments";
+    promoCode?: string;
+    promoDiscount?: string;
+    installmentMonths?: string;
+  };
   const parsedAddress = address ? JSON.parse(address) : null;
 
   const lineItemsWithProduct = await stripe.checkout.sessions.listLineItems(
@@ -108,35 +145,63 @@ async function createOrderInSanity(
     stripeCheckoutSessionId: id,
     stripePaymentIntentId: payment_intent,
     customerName,
-    stripeCustomerId: customerEmail,
+    stripeCustomerId: (session.customer as string) || "",
     clerkUserId: clerkUserId,
     email: customerEmail,
     currency,
     amountDiscount: total_details?.amount_discount
       ? total_details.amount_discount / 100
       : 0,
+    promoCode: promoCode || "",
+    promoDiscount: Number(promoDiscount || 0),
+    paymentMethod: paymentMethod || "cmi_card",
+    paymentStatus: "paid",
+    ...(paymentMethod === "installments"
+      ? {
+          installmentPlan: {
+            months: Number(installmentMonths || 3),
+            monthlyAmount:
+              (amount_total ? amount_total / 100 : 0) /
+              Math.max(Number(installmentMonths || 3), 1),
+          },
+        }
+      : {}),
 
     products: sanityProducts,
     totalPrice: amount_total ? amount_total / 100 : 0,
     status: "paid",
     orderDate: new Date().toISOString(),
-    invoice: invoice
+    ...(invoice
       ? {
-          id: invoice.id,
-          number: invoice.number,
-          hosted_invoice_url: invoice.hosted_invoice_url,
+          invoice: {
+            id: invoice.id,
+            number: invoice.number,
+            hosted_invoice_url: invoice.hosted_invoice_url,
+          },
         }
-      : null,
-    address: parsedAddress
+      : {}),
+    ...(parsedAddress
       ? {
-          state: parsedAddress.state,
-          zip: parsedAddress.zip,
-          city: parsedAddress.city,
-          address: parsedAddress.address,
-          name: parsedAddress.name,
+          address: {
+            state: parsedAddress.state,
+            zip: parsedAddress.zip,
+            city: parsedAddress.city,
+            phone: parsedAddress.phone,
+            address: parsedAddress.address,
+            name: parsedAddress.name,
+          },
         }
-      : null,
+      : {}),
   });
+  if (promoCode) {
+    const promoId = await backendClient.fetch<string | null>(
+      `*[_type == "promoCode" && code == $code][0]._id`,
+      { code: promoCode }
+    );
+    if (promoId) {
+      await backendClient.patch(promoId).inc({ usedCount: 1 }).commit();
+    }
+  }
 
   // Update stock levels in Sanity
 

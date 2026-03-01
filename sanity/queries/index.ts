@@ -109,7 +109,43 @@ const getMyOrders = async (userId: string) => {
       query: MY_ORDERS_QUERY,
       params: { userId },
     });
-    return orders?.data || null;
+    const rawOrders = orders?.data || [];
+    const deduped = rawOrders.reduce<MY_ORDERS_QUERYResult>((acc, order) => {
+      const key = order.orderNumber || order._id;
+      const existingIndex = acc.findIndex(
+        (item) => (item.orderNumber || item._id) === key
+      );
+      if (existingIndex === -1) {
+        acc.push(order);
+        return acc;
+      }
+
+      const existingUpdatedAt = acc[existingIndex]?._updatedAt
+        ? new Date(acc[existingIndex]._updatedAt as string).getTime()
+        : 0;
+      const currentUpdatedAt = order?._updatedAt
+        ? new Date(order._updatedAt as string).getTime()
+        : 0;
+
+      const existingOrderDate = acc[existingIndex]?.orderDate
+        ? new Date(acc[existingIndex].orderDate as string).getTime()
+        : 0;
+      const currentOrderDate = order?.orderDate
+        ? new Date(order.orderDate as string).getTime()
+        : 0;
+
+      if (
+        currentUpdatedAt > existingUpdatedAt ||
+        (currentUpdatedAt === existingUpdatedAt &&
+          currentOrderDate >= existingOrderDate)
+      ) {
+        acc[existingIndex] = order;
+      }
+
+      return acc;
+    }, []);
+
+    return deduped;
   } catch (error) {
     console.error("Error fetching product by ID:", error);
     return null;

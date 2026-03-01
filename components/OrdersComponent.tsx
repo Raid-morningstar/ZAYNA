@@ -26,8 +26,13 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
     <>
       <TableBody>
         <TooltipProvider>
-          {orders.map((order) => (
-            <Tooltip key={order?.orderNumber}>
+          {orders.map((order, index) => {
+            const paymentStatus = (
+              order as MY_ORDERS_QUERYResult[number] & { paymentStatus?: string }
+            ).paymentStatus;
+
+            return (
+            <Tooltip key={order?._id || order?.orderNumber || `order-${index}`}>
               <TooltipTrigger asChild>
                 <TableRow
                   className="cursor-pointer hover:bg-gray-100 h-12"
@@ -64,6 +69,22 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                       </span>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {paymentStatus && (
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          paymentStatus === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : paymentStatus === "partial"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {paymentStatus.charAt(0).toUpperCase() +
+                          paymentStatus.slice(1)}
+                      </span>
+                    )}
+                  </TableCell>
 
                   <TableCell className="hidden sm:table-cell">
                     {order?.invoice && (
@@ -90,7 +111,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                 <p>Click to see order details</p>
               </TooltipContent>
             </Tooltip>
-          ))}
+          )})}
         </TooltipProvider>
       </TableBody>
       <OrderDetailDialog

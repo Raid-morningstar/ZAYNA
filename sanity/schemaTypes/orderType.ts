@@ -122,6 +122,7 @@ export const orderType = defineType({
         defineField({ name: "state", title: "State", type: "string" }),
         defineField({ name: "zip", title: "Zip Code", type: "string" }),
         defineField({ name: "city", title: "City", type: "string" }),
+        defineField({ name: "phone", title: "Phone Number", type: "string" }),
         defineField({ name: "address", title: "Address", type: "string" }),
         defineField({ name: "name", title: "Name", type: "string" }),
       ],
@@ -141,6 +142,65 @@ export const orderType = defineType({
           { title: "Cancelled", value: "cancelled" },
         ],
       },
+    }),
+    defineField({
+      name: "paymentMethod",
+      title: "Payment Method",
+      type: "string",
+      options: {
+        list: [
+          { title: "Cash on Delivery", value: "cod" },
+          { title: "CMI Card", value: "cmi_card" },
+          { title: "Installments", value: "installments" },
+        ],
+      },
+      initialValue: "cmi_card",
+    }),
+    defineField({
+      name: "paymentStatus",
+      title: "Payment Status",
+      type: "string",
+      options: {
+        list: [
+          { title: "Pending", value: "pending" },
+          { title: "Partial", value: "partial" },
+          { title: "Paid", value: "paid" },
+          { title: "Failed", value: "failed" },
+          { title: "Refunded", value: "refunded" },
+        ],
+      },
+      initialValue: "pending",
+    }),
+    defineField({
+      name: "promoCode",
+      title: "Promo Code",
+      type: "string",
+    }),
+    defineField({
+      name: "promoDiscount",
+      title: "Promo Discount",
+      type: "number",
+      initialValue: 0,
+      validation: (Rule) => Rule.min(0),
+    }),
+    defineField({
+      name: "installmentPlan",
+      title: "Installment Plan",
+      type: "object",
+      fields: [
+        defineField({
+          name: "months",
+          title: "Months",
+          type: "number",
+          validation: (Rule) => Rule.min(2).max(12),
+        }),
+        defineField({
+          name: "monthlyAmount",
+          title: "Monthly Amount",
+          type: "number",
+          validation: (Rule) => Rule.min(0),
+        }),
+      ],
     }),
     defineField({
       name: "orderDate",

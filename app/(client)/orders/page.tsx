@@ -1,4 +1,5 @@
 import Container from "@/components/Container";
+import OrderStatusAutoRefresh from "@/components/OrderStatusAutoRefresh";
 import OrdersComponent from "@/components/OrdersComponent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,9 +10,14 @@ import { auth } from "@clerk/nextjs/server";
 import { FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { unstable_noStore as noStore } from "next/cache";
 import React from "react";
 
+export const dynamic = "force-dynamic";
+
 const OrdersPage = async () => {
+  noStore();
+
   const { userId } = await auth();
   if (!userId) {
     return redirect("/");
@@ -21,6 +27,7 @@ const OrdersPage = async () => {
 
   return (
     <div>
+      <OrderStatusAutoRefresh intervalMs={10000} />
       <Container className="py-10">
         {orders?.length ? (
           <Card className="w-full">
@@ -44,6 +51,7 @@ const OrdersPage = async () => {
                       </TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Payment</TableHead>
                       <TableHead className="hidden sm:table-cell">
                         Invoice Number
                       </TableHead>
