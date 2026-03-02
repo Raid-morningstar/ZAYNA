@@ -108,6 +108,7 @@ const getMyOrders = async (userId: string) => {
     const orders = await sanityFetch<MY_ORDERS_QUERYResult>({
       query: MY_ORDERS_QUERY,
       params: { userId },
+      revalidate: 0,
     });
     const rawOrders = orders?.data || [];
     const deduped = rawOrders.reduce<MY_ORDERS_QUERYResult>((acc, order) => {
@@ -149,6 +150,20 @@ const getMyOrders = async (userId: string) => {
   } catch (error) {
     console.error("Error fetching product by ID:", error);
     return null;
+  }
+};
+
+const getMyOrdersCount = async (userId: string) => {
+  try {
+    const { data } = await sanityFetch<number>({
+      query: `count(*[_type == "order" && clerkUserId == $userId])`,
+      params: { userId },
+      revalidate: 30,
+    });
+    return data ?? 0;
+  } catch (error) {
+    console.error("Error fetching orders count:", error);
+    return 0;
   }
 };
 const getAllBlogs = async (quantity: number) => {
@@ -208,6 +223,7 @@ export {
   getProductBySlug,
   getBrand,
   getMyOrders,
+  getMyOrdersCount,
   getAllBlogs,
   getSingleBlog,
   getBlogCategories,

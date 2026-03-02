@@ -47,7 +47,16 @@ const Shop = ({ categories, brands }: Props) => {
         && price >= $minPrice
         && price <= $maxPrice
       ] | order(name asc) {
-        ...,
+        _id,
+        name,
+        slug,
+        images,
+        description,
+        price,
+        discount,
+        stock,
+        status,
+        variant,
         "categories": categories[]->title
       }
     `;
@@ -58,8 +67,7 @@ const Shop = ({ categories, brands }: Props) => {
           selectedBrand: selectedBrand ?? "",
           minPrice,
           maxPrice,
-        },
-        { next: { revalidate: 0 } }
+        }
       );
       setProducts(data || []);
     } catch (error) {

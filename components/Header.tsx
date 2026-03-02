@@ -7,18 +7,17 @@ import CartIcon from "./CartIcon";
 import FavoriteButton from "./FavoriteButton";
 import SignIn from "./SignIn";
 import MobileMenu from "./MobileMenu";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { ClerkLoaded, SignedIn, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import { Logs } from "lucide-react";
-import { getMyOrders } from "@/sanity/queries";
+import { getMyOrdersCount } from "@/sanity/queries";
 
 const Header = async () => {
-  const user = await currentUser();
   const { userId } = await auth();
-  let orders = null;
+  let ordersCount = 0;
   if (userId) {
-    orders = await getMyOrders(userId);
+    ordersCount = await getMyOrdersCount(userId);
   }
 
   return (
@@ -34,14 +33,14 @@ const Header = async () => {
           <CartIcon />
           <FavoriteButton />
 
-          {user && (
+          {userId && (
             <Link
               href={"/orders"}
               className="group relative hover:text-shop_light_green hoverEffect"
             >
               <Logs />
               <span className="absolute -top-1 -right-1 bg-shop_btn_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
-                {orders?.length ? orders.length : 0}
+                {ordersCount}
               </span>
             </Link>
           )}
@@ -50,7 +49,7 @@ const Header = async () => {
             <SignedIn>
               <UserButton />
             </SignedIn>
-            {!user && <SignIn />}
+            {!userId && <SignIn />}
           </ClerkLoaded>
         </div>
       </Container>

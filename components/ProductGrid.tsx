@@ -21,11 +21,21 @@ const ProductGrid = () => {
       setLoading(true);
       try {
         const query = `*[_type == "product" && variant == $variant] | order(name asc){
-  ...,"categories": categories[]->title
+  _id,
+  name,
+  slug,
+  images,
+  description,
+  price,
+  discount,
+  stock,
+  status,
+  variant,
+  "categories": categories[]->title
 }`;
         const params = { variant: selectedTab.toLowerCase() };
-        const response = await client.fetch(query, params);
-        setProducts(await response);
+        const response = await client.fetch<Product[]>(query, params);
+        setProducts(response || []);
       } catch (error) {
         console.log("Product fetching Error", error);
       } finally {

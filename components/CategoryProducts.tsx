@@ -31,7 +31,16 @@ const CategoryProducts = ({ categories, slug }: Props) => {
         {
           "categoryId": *[_type == "category" && slug.current == $categorySlug][0]._id,
           "products": *[_type == 'product' && references(^.categoryId)] | order(name asc){
-            ...,
+            _id,
+            name,
+            slug,
+            images,
+            description,
+            price,
+            discount,
+            stock,
+            status,
+            variant,
             "categories": categories[]->title
           }
         }
