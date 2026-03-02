@@ -79,7 +79,7 @@ export async function createManualOrder(input: CreateManualOrderInput) {
     customerName: user?.fullName || "Customer",
     clerkUserId: userId,
     email: customerEmail,
-    currency: "USD",
+    currency: "MAD",
     products: input.items.map((item) => ({
       _key: crypto.randomUUID(),
       product: {

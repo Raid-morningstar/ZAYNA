@@ -438,7 +438,7 @@ const CartPage = () => {
                               className={`text-xs ${promoState.valid ? "text-green-600" : "text-red-600"}`}
                             >
                               {promoState.valid
-                                ? `Applied - discount ${promoState.discountAmount.toFixed(2)} USD`
+                                ? `Applied - discount ${promoState.discountAmount.toFixed(2)} MAD`
                                 : promoState.message || "Promo not valid"}
                             </p>
                           )}
@@ -504,7 +504,7 @@ const CartPage = () => {
                               </select>
                               <p className="text-xs text-gray-500 mt-1">
                                 Approx monthly:{" "}
-                                {(finalTotal / Math.max(installmentMonths, 1)).toFixed(2)} USD
+                                {(finalTotal / Math.max(installmentMonths, 1)).toFixed(2)} MAD
                               </p>
                             </div>
                           )}

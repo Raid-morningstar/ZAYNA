@@ -80,9 +80,9 @@ const DASHBOARD_QUERY = `{
   "installmentsEligibleCount": count(*[_type == "customerProfile" && installmentsEligible == true])
 }`
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
+const currencyFormatter = new Intl.NumberFormat('fr-MA', {
   style: 'currency',
-  currency: 'USD',
+  currency: 'MAD',
   maximumFractionDigits: 0,
 })
 

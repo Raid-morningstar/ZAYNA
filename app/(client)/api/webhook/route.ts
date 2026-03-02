@@ -94,6 +94,7 @@ async function createOrderInSanity(
     payment_intent,
     total_details,
   } = session;
+  const normalizedCurrency = (currency || "mad").toUpperCase();
   const {
     orderNumber,
     customerName,
@@ -148,7 +149,7 @@ async function createOrderInSanity(
     stripeCustomerId: (session.customer as string) || "",
     clerkUserId: clerkUserId,
     email: customerEmail,
-    currency,
+    currency: normalizedCurrency,
     amountDiscount: total_details?.amount_discount
       ? total_details.amount_discount / 100
       : 0,
