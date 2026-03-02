@@ -28,11 +28,18 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     setLoading(true);
     try {
       const query = `
-        *[_type == 'product' && categories[]._ref in *[_type == "category" && slug.current == $categorySlug]._id] | order(name asc){
-        ...,"categories": categories[]->title}
+        {
+          "categoryId": *[_type == "category" && slug.current == $categorySlug][0]._id,
+          "products": *[_type == 'product' && references(^.categoryId)] | order(name asc){
+            ...,
+            "categories": categories[]->title
+          }
+        }
       `;
-      const data = await client.fetch(query, { categorySlug });
-      setProducts(data);
+      const data = await client.fetch<{ products: Product[] }>(query, {
+        categorySlug,
+      });
+      setProducts(data?.products || []);
     } catch (error) {
       console.error("Error fetching products:", error);
       setProducts([]);

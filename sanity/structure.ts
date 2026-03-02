@@ -37,6 +37,33 @@ export const structure: StructureResolver = (S) =>
                       .defaultOrdering([{field: 'orderDate', direction: 'desc'}])
                   ),
                 S.listItem()
+                  .title('Processing Orders')
+                  .child(
+                    S.documentList()
+                      .title('Processing Orders')
+                      .schemaType('order')
+                      .filter('_type == "order" && status == "processing"')
+                      .defaultOrdering([{field: 'orderDate', direction: 'desc'}])
+                  ),
+                S.listItem()
+                  .title('Shipped / Delivery')
+                  .child(
+                    S.documentList()
+                      .title('Shipped / Delivery')
+                      .schemaType('order')
+                      .filter('_type == "order" && status in ["shipped", "out_for_delivery"]')
+                      .defaultOrdering([{field: 'orderDate', direction: 'desc'}])
+                  ),
+                S.listItem()
+                  .title('Delivered Orders')
+                  .child(
+                    S.documentList()
+                      .title('Delivered Orders')
+                      .schemaType('order')
+                      .filter('_type == "order" && status == "delivered"')
+                      .defaultOrdering([{field: 'orderDate', direction: 'desc'}])
+                  ),
+                S.listItem()
                   .title('All Orders')
                   .child(
                     S.documentTypeList('order')

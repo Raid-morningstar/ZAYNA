@@ -26,18 +26,22 @@ export const orderType = defineType({
       name: "stripeCheckoutSessionId",
       title: "Stripe Checkout Session ID",
       type: "string",
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: "stripeCustomerId",
       title: "Stripe Customer ID",
       type: "string",
-      validation: (Rule) => Rule.required(),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: "clerkUserId",
       title: "Store User ID",
       type: "string",
-      validation: (Rule) => Rule.required(),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: "customerName",
@@ -55,7 +59,8 @@ export const orderType = defineType({
       name: "stripePaymentIntentId",
       title: "Stripe Payment Intent ID",
       type: "string",
-      validation: (Rule) => Rule.required(),
+      hidden: true,
+      readOnly: true,
     }),
     defineField({
       name: "products",
@@ -132,6 +137,7 @@ export const orderType = defineType({
       title: "Order Status",
       type: "string",
       options: {
+        layout: "radio",
         list: [
           { title: "Pending", value: "pending" },
           { title: "Processing", value: "processing" },
@@ -142,6 +148,8 @@ export const orderType = defineType({
           { title: "Cancelled", value: "cancelled" },
         ],
       },
+      initialValue: "pending",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "paymentMethod",
@@ -161,6 +169,7 @@ export const orderType = defineType({
       title: "Payment Status",
       type: "string",
       options: {
+        layout: "radio",
         list: [
           { title: "Pending", value: "pending" },
           { title: "Partial", value: "partial" },
@@ -170,6 +179,7 @@ export const orderType = defineType({
         ],
       },
       initialValue: "pending",
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "promoCode",
@@ -207,6 +217,7 @@ export const orderType = defineType({
       title: "Order Date",
       type: "datetime",
       validation: (Rule) => Rule.required(),
+      readOnly: true,
     }),
   ],
   preview: {
@@ -218,10 +229,14 @@ export const orderType = defineType({
       email: "email",
     },
     prepare(select) {
-      const orderIdSnippet = `${select.orderId.slice(0, 5)}...${select.orderId.slice(-5)}`;
+      const safeOrderId = select.orderId || "NoOrderId";
+      const orderIdSnippet =
+        safeOrderId.length > 10
+          ? `${safeOrderId.slice(0, 5)}...${safeOrderId.slice(-5)}`
+          : safeOrderId;
       return {
-        title: `${select.name} (${orderIdSnippet})`,
-        subtitle: `${select.amount} ${select.currency}, ${select.email}`,
+        title: `${select.name || "Unknown Customer"} (${orderIdSnippet})`,
+        subtitle: `${select.amount || 0} ${select.currency || "USD"}, ${select.email || "-"}`,
         media: BasketIcon,
       };
     },

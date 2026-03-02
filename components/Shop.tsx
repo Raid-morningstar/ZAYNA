@@ -29,6 +29,7 @@ const Shop = ({ categories, brands }: Props) => {
     brandParams || null
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -40,28 +41,27 @@ const Shop = ({ categories, brands }: Props) => {
         maxPrice = max;
       }
       const query = `
-      *[_type == 'product' 
-        && (
-          !defined($selectedCategory) || 
-          categories[]._ref in *[_type == "category" && slug.current == $selectedCategory]._id
-        )
-        && (
-          !defined($selectedBrand) || 
-          brand._ref in *[_type == "brand" && slug.current == $selectedBrand]._id
-        )
-        && price >= $minPrice && price <= $maxPrice
-      ] 
-      | order(name asc) {
+      *[_type == "product"
+        && ($selectedCategory == "" || references(*[_type == "category" && slug.current == $selectedCategory][0]._id))
+        && ($selectedBrand == "" || references(*[_type == "brand" && slug.current == $selectedBrand][0]._id))
+        && price >= $minPrice
+        && price <= $maxPrice
+      ] | order(name asc) {
         ...,
         "categories": categories[]->title
       }
     `;
-      const data = await client.fetch(
+      const data = await client.fetch<Product[]>(
         query,
-        { selectedCategory, selectedBrand, minPrice, maxPrice },
+        {
+          selectedCategory: selectedCategory ?? "",
+          selectedBrand: selectedBrand ?? "",
+          minPrice,
+          maxPrice,
+        },
         { next: { revalidate: 0 } }
       );
-      setProducts(data);
+      setProducts(data || []);
     } catch (error) {
       console.log("Shop product fetching Error", error);
     } finally {

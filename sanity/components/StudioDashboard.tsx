@@ -107,6 +107,13 @@ function sumOrderRevenue(orders: OrderLite[]) {
   return orders.reduce((total, order) => total + (order.totalPrice ?? 0), 0)
 }
 
+function isRevenueOrder(order: OrderLite) {
+  if (order.paymentStatus) {
+    return order.paymentStatus === 'paid'
+  }
+  return order.status === 'paid'
+}
+
 function dedupeOrders(orders: OrderLite[]) {
   const byKey = new Map<string, OrderLite>()
   for (const order of orders) {
@@ -287,7 +294,7 @@ export default function StudioDashboard() {
 
   const metrics = useMemo(() => {
     const uniqueOrders = dedupeOrders(data?.orders ?? [])
-    const orders = uniqueOrders.filter((order) => order.status === 'paid')
+    const orders = uniqueOrders.filter(isRevenueOrder)
     const products = data?.products ?? []
     const totalIncome = sumOrderRevenue(orders)
 

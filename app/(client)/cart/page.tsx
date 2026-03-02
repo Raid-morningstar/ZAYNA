@@ -278,7 +278,16 @@ const CartPage = () => {
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
-      toast.error("Checkout failed. Please try again.");
+      const message =
+        error instanceof Error ? error.message : "Checkout failed. Please try again.";
+      if (
+        message.includes("STRIPE_SECRET_KEY") ||
+        message.includes("NEXT_PUBLIC_BASE_URL")
+      ) {
+        toast.error("Card payment is not configured yet. Please check Stripe environment variables.");
+      } else {
+        toast.error("Checkout failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -455,7 +464,7 @@ const CartPage = () => {
                               <RadioGroupItem value="cmi_card" id="pay-cmi" />
                               <Label htmlFor="pay-cmi" className="flex items-center gap-2">
                                 <CreditCard size={16} />
-                                Card Payment (CMI)
+                                Card Payment (Stripe)
                               </Label>
                             </div>
                             {canUseInstallments && (
@@ -498,6 +507,12 @@ const CartPage = () => {
                                 {(finalTotal / Math.max(installmentMonths, 1)).toFixed(2)} USD
                               </p>
                             </div>
+                          )}
+                          {paymentMethod === "cmi_card" && (
+                            <p className="text-xs text-gray-500">
+                              You will be redirected to Stripe Checkout to enter your card details securely.
+                              Card numbers and CVC are not stored in this app.
+                            </p>
                           )}
                         </div>
                         <div className="flex items-center justify-between">
