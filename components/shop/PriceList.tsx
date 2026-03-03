@@ -4,11 +4,11 @@ import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
 
 const priceArray = [
-  { title: "Under 100 MAD", value: "0-100" },
+  { title: "Moins de 100 MAD", value: "0-100" },
   { title: "100 MAD - 200 MAD", value: "100-200" },
   { title: "200 MAD - 300 MAD", value: "200-300" },
   { title: "300 MAD - 500 MAD", value: "300-500" },
-  { title: "Over 500 MAD", value: "500-10000" },
+  { title: "Plus de 500 MAD", value: "500-10000" },
 ];
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
   return (
     <div className="w-full bg-white p-5">
-      <Title className="text-base font-black">Price</Title>
+      <Title className="text-base font-black">Prix</Title>
       <RadioGroup className="mt-2 space-y-1" value={selectedPrice || ""}>
         {priceArray.map((price, index) => (
           <div
@@ -45,7 +45,7 @@ const PriceList = ({ selectedPrice, setSelectedPrice }: Props) => {
           onClick={() => setSelectedPrice(null)}
           className="text-sm font-medium mt-2 underline underline-offset-2 decoration-1 hover:text-shop_dark_green hoverEffect"
         >
-          Reset selection
+          Reinitialiser la selection
         </button>
       )}
     </div>

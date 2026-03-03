@@ -20,7 +20,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
     MY_ORDERS_QUERYResult[number] | null
   >(null);
   const handleDelete = () => {
-    toast.error("Delete method applied for Admin");
+    toast.error("La suppression est reservee a l'administrateur");
   };
   return (
     <>
@@ -39,7 +39,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                   onClick={() => setSelectedOrder(order)}
                 >
                   <TableCell className="font-medium">
-                    {order.orderNumber?.slice(-10) ?? "N/A"}...
+                    {order.orderNumber?.slice(-10) ?? "N/D"}...
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {order?.orderDate &&
@@ -108,7 +108,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                 </TableRow>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Click to see order details</p>
+                <p>Cliquez pour voir les details de la commande</p>
               </TooltipContent>
             </Tooltip>
           )})}

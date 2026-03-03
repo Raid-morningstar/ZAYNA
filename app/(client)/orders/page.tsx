@@ -32,7 +32,7 @@ const OrdersPage = async () => {
         {orders?.length ? (
           <Card className="w-full">
             <CardHeader>
-              <CardTitle>Order List</CardTitle>
+              <CardTitle>Liste des commandes</CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea>
@@ -40,20 +40,20 @@ const OrdersPage = async () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-25 md:w-auto">
-                        Order Number
+                        Numero de commande
                       </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Date
                       </TableHead>
-                      <TableHead>Customer</TableHead>
+                      <TableHead>Client</TableHead>
                       <TableHead className="hidden sm:table-cell">
                         Email
                       </TableHead>
                       <TableHead>Total</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Payment</TableHead>
+                      <TableHead>Statut</TableHead>
+                      <TableHead>Paiement</TableHead>
                       <TableHead className="hidden sm:table-cell">
-                        Invoice Number
+                        Numero de facture
                       </TableHead>
                       <TableHead className="text-center">Action</TableHead>
                     </TableRow>
@@ -68,14 +68,14 @@ const OrdersPage = async () => {
           <div className="flex flex-col items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
             <FileX className="h-24 w-24 text-gray-400 mb-4" />
             <h2 className="text-2xl font-semibold text-gray-900">
-              No orders found
+              Aucune commande trouvee
             </h2>
             <p className="mt-2 text-sm text-gray-600 text-center max-w-md">
-              It looks like you haven&apos;t placed any orders yet. Start
-              shopping to see your orders here!
+              Vous n&apos;avez pas encore passe de commande. Commencez vos
+              achats pour voir vos commandes ici !
             </p>
             <Button asChild className="mt-6">
-              <Link href="/">Browse Products</Link>
+              <Link href="/">Parcourir les produits</Link>
             </Button>
           </div>
         )}

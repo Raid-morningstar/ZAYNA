@@ -22,10 +22,10 @@ const AddToCartButton = ({ product, className }: Props) => {
     if ((product.stock as number) > itemCount) {
       addItem(product);
       toast.success(
-        `${product.name?.substring(0, 12)}... added successfully!`
+        `${product.name?.substring(0, 12)}... ajoute avec succes !`
       );
     } else {
-      toast.error("Can not add more than available stock");
+      toast.error("Impossible d'ajouter plus que le stock disponible");
     }
   };
   return (
@@ -33,11 +33,11 @@ const AddToCartButton = ({ product, className }: Props) => {
       {itemCount ? (
         <div className="text-sm w-full">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-darkColor/80">Quantity</span>
+            <span className="text-xs text-darkColor/80">Quantite</span>
             <QuantityButtons product={product} />
           </div>
           <div className="flex items-center justify-between border-t pt-1">
-            <span className="text-xs font-semibold">Subtotal</span>
+            <span className="text-xs font-semibold">Sous-total</span>
             <PriceFormatter
               amount={product.price ? product.price * itemCount : 0}
             />
@@ -48,11 +48,14 @@ const AddToCartButton = ({ product, className }: Props) => {
           onClick={handleAddToCart}
           disabled={isOutOfStock}
           className={cn(
-            "w-full bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
+            "w-full h-auto min-h-10 px-2 sm:px-3 bg-shop_dark_green/80 text-lightBg shadow-none border border-shop_dark_green/80 font-semibold text-[11px] sm:text-sm tracking-normal text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
             className
           )}
         >
-          <ShoppingBag /> {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+          <ShoppingBag className="hidden sm:inline-flex h-4 w-4 shrink-0" />
+          <span className="text-center whitespace-normal sm:whitespace-nowrap">
+            {isOutOfStock ? "Rupture de stock" : "Ajouter au panier"}
+          </span>
         </Button>
       )}
     </div>

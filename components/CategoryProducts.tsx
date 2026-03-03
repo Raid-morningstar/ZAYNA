@@ -15,7 +15,7 @@ interface Props {
 
 const CategoryProducts = ({ categories, slug }: Props) => {
   const [currentSlug, setCurrentSlug] = useState(slug);
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const handleCategoryChange = (newSlug: string) => {
@@ -28,27 +28,26 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     setLoading(true);
     try {
       const query = `
-        {
-          "categoryId": *[_type == "category" && slug.current == $categorySlug][0]._id,
-          "products": *[_type == 'product' && references(^.categoryId)] | order(name asc){
-            _id,
-            name,
-            slug,
-            images,
-            description,
-            price,
-            discount,
-            stock,
-            status,
-            variant,
-            "categories": categories[]->title
-          }
+        *[_type == "product"
+          && references(*[_type == "category" && slug.current == $categorySlug][0]._id)
+        ] | order(name asc) {
+          _id,
+          name,
+          slug,
+          images,
+          description,
+          price,
+          discount,
+          stock,
+          status,
+          variant,
+          "categories": categories[]->title
         }
       `;
-      const data = await client.fetch<{ products: Product[] }>(query, {
+      const data = await client.fetch<Product[]>(query, {
         categorySlug,
       });
-      setProducts(data?.products || []);
+      setProducts(data || []);
     } catch (error) {
       console.error("Error fetching products:", error);
       setProducts([]);
@@ -78,7 +77,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full">
             <div className="flex items-center space-x-2 text-blue-600">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Product is loading...</span>
+              <span>Chargement des produits...</span>
             </div>
           </div>
         ) : products.length > 0 ? (

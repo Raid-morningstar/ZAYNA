@@ -13,7 +13,7 @@ interface Props {
 const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
   return (
     <div className="w-full bg-white p-5">
-      <Title className="text-base font-black">Brands</Title>
+      <Title className="text-base font-black">Marques</Title>
       <RadioGroup value={selectedBrand || ""} className="mt-2 space-y-1">
         {brands.map((brand) => (
           <div
@@ -39,7 +39,7 @@ const BrandList = ({ brands, selectedBrand, setSelectedBrand }: Props) => {
             onClick={() => setSelectedBrand(null)}
             className="text-sm font-medium mt-2 underline underline-offset-2 decoration-1 hover:text-shop_dark_green hoverEffect text-left"
           >
-            Reset selection
+            Reinitialiser la selection
           </button>
         )}
       </RadioGroup>

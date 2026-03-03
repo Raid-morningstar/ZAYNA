@@ -1,4 +1,4 @@
-import NoAccess from "@/components/NoAccess";
+﻿import NoAccess from "@/components/NoAccess";
 import WishListProducts from "@/components/WishListProducts";
 import { currentUser } from "@clerk/nextjs/server";
 import React from "react";
@@ -10,10 +10,12 @@ const WishListPage = async () => {
       {user ? (
         <WishListProducts />
       ) : (
-        <NoAccess details="Log in to view your wishlist items. Don’t miss out on your cart products to make the payment!" />
+        <NoAccess details="Connectez-vous pour consulter votre liste de souhaits et finaliser vos achats." />
       )}
     </>
   );
 };
 
 export default WishListPage;
+
+

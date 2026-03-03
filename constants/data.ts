@@ -1,17 +1,18 @@
 export const headerData = [
-    {title: "Home", href: "/"},
-    {title: "Shop", href: "/shop"},
-    {title: "Blog", href: "/blog"},
-    {title: "Contact", href: "/contact"},
-    {title: "Hot Deal", href: "/deal"}
+    {title: "Accueil", href: "/"},
+    {title: "Boutique", href: "/shop"},
+    {title: "Categories", href: "/#categories"},
+    {title: "Contact", href: "/#contact"},
+    {title: "Bonnes affaires", href: "/deal"}
 ];
 export const quickLinksData = [
-  { title: "About us", href: "/about" },
-  { title: "Contact us", href: "/contact" },
-  { title: "Terms & Conditions", href: "/terms" },
-  { title: "Privacy Policy", href: "/privacy" },
-  { title: "FAQs", href: "/faqs" },
-  { title: "Help", href: "/help" },
+  { title: "A propos", href: "/about" },
+  { title: "Contactez-nous", href: "/#contact" },
+  { title: "Categories", href: "/#categories" },
+  { title: "Conditions generales", href: "/terms" },
+  { title: "Politique de confidentialite", href: "/privacy" },
+  // { title: "FAQ", href: "/faqs" },
+  // { title: "Aide", href: "/help" },
 ];
 export const categoriesData = [
   { title: "PROMOS", href: "promos" },
@@ -24,7 +25,7 @@ export const categoriesData = [
 ];
 export const productType = [
   { title: "Gadget", value: "gadget" },
-  { title: "Appliances", value: "appliances" },
-  { title: "Refrigerators", value: "refrigerators" },
-  { title: "Others", value: "others" },
+  { title: "Appareils", value: "appliances" },
+  { title: "Refrigerateurs", value: "refrigerators" },
+  { title: "Autres", value: "others" },
 ];

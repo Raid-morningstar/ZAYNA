@@ -35,16 +35,16 @@ const SuccessPageContent = () => {
         </motion.div>
 
         <h1 className="text-3xl font-bold text-gray-900 mb-4">
-          Order Confirmed!
+          Commande confirmee !
         </h1>
         <div className="space-y-4 mb-4 text-left">
           <p className="text-gray-700">
-            Thank you for your purchase. We&apos;re processing your order and
-            will ship it soon. A confirmation email with your order details will
-            be sent to your inbox shortly.
+            Merci pour votre achat. Votre commande est en cours de traitement
+            et sera expediée bientot. Un e-mail de confirmation avec les details
+            de la commande vous sera envoye.
           </p>
           <p className="text-gray-700">
-            Order Number:{" "}
+            Numero de commande :{" "}
             <span className="text-black font-semibold">{orderNumber}</span>
           </p>
         </div>
@@ -54,21 +54,21 @@ const SuccessPageContent = () => {
             className="flex items-center justify-center px-4 py-3 font-semibold bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md"
           >
             <Home className="w-5 h-5 mr-2" />
-            Home
+            Accueil
           </Link>
           <Link
             href="/orders"
             className="flex items-center justify-center px-4 py-3 font-semibold bg-lightGreen text-black border border-lightGreen rounded-lg hover:bg-gray-100 transition-all duration-300 shadow-md"
           >
             <Package className="w-5 h-5 mr-2" />
-            Orders
+            Commandes
           </Link>
           <Link
             href="/"
             className="flex items-center justify-center px-4 py-3 font-semibold bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-300 shadow-md"
           >
             <ShoppingBag className="w-5 h-5 mr-2" />
-            Shop
+            Boutique
           </Link>
         </div>
       </motion.div>
@@ -78,7 +78,7 @@ const SuccessPageContent = () => {
 
 const SuccessPage = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Chargement...</div>}>
       <SuccessPageContent />
     </Suspense>
   );

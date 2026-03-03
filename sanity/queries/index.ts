@@ -25,7 +25,7 @@ import {
   SINGLE_BLOG_QUERY,
 } from "./query";
 
-const getCategories = async (quantity?: number) => {
+const getCategories = async (quantity?: number, revalidate?: number) => {
   try {
     const query = quantity
       ? `*[_type == 'category'] | order(title asc) [0...$quantity] {
@@ -39,6 +39,7 @@ const getCategories = async (quantity?: number) => {
     const { data } = await sanityFetch<Array<Category & { productCount: number }>>({
       query,
       params: quantity ? { quantity } : {},
+      ...(typeof revalidate === "number" ? { revalidate } : {}),
     });
     return data;
   } catch (error) {
@@ -153,6 +154,25 @@ const getMyOrders = async (userId: string) => {
   }
 };
 
+const getFooterCategories = async (quantity = 8) => {
+  try {
+    const query = `*[_type == "category" && defined(slug.current)] | order(title asc) [0...$quantity]{
+      _id,
+      title,
+      slug
+    }`;
+    const { data } = await sanityFetch<Array<Pick<Category, "_id" | "title" | "slug">>>({
+      query,
+      params: { quantity },
+      revalidate: 60,
+    });
+    return data ?? [];
+  } catch (error) {
+    console.log("Error fetching footer categories", error);
+    return [];
+  }
+};
+
 const getMyOrdersCount = async (userId: string) => {
   try {
     const { data } = await sanityFetch<number>({
@@ -217,6 +237,7 @@ const getOthersBlog = async (slug: string, quantity: number) => {
 };
 export {
   getCategories,
+  getFooterCategories,
   getAllBrands,
   getLatestBlogs,
   getDealProducts,

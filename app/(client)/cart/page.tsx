@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   createCheckoutSession,
@@ -96,7 +96,7 @@ const CartPage = () => {
     try {
       const response = await fetch("/api/addresses", { cache: "no-store" });
       if (!response.ok) {
-        throw new Error("Failed to fetch addresses");
+        throw new Error("Impossible de recuperer les adresses");
       }
 
       const data: Address[] = await response.json();
@@ -130,7 +130,7 @@ const CartPage = () => {
       !addressForm.state.trim() ||
       !addressForm.zip.trim()
     ) {
-      toast.error("Please fill all address fields");
+      toast.error("Veuillez remplir tous les champs de l'adresse");
       return;
     }
 
@@ -143,7 +143,7 @@ const CartPage = () => {
       });
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.error || "Failed to create address");
+        throw new Error(body?.error || "Impossible de creer l'adresse");
       }
       const created: Address = await response.json();
       setAddresses((prev) => [created, ...(prev || [])]);
@@ -158,11 +158,11 @@ const CartPage = () => {
         default: false,
       });
       setIsAddressDialogOpen(false);
-      toast.success("Address added successfully");
+      toast.success("Adresse ajoutee avec succes");
     } catch (error) {
       console.error("Create address error:", error);
       const message =
-        error instanceof Error ? error.message : "Unable to create address";
+        error instanceof Error ? error.message : "Impossible de creer l'adresse";
       toast.error(message);
     } finally {
       setLoading(false);
@@ -197,7 +197,7 @@ const CartPage = () => {
 
   const applyPromoCode = async () => {
     if (!promoCode.trim()) {
-      toast.error("Please enter a promo code");
+      toast.error("Veuillez saisir un code promo");
       return;
     }
     try {
@@ -214,13 +214,13 @@ const CartPage = () => {
       const data = await response.json();
       setPromoState(data);
       if (data.valid) {
-        toast.success("Promo code applied");
+        toast.success("Code promo applique");
       } else {
-        toast.error(data.message || "Invalid promo code");
+        toast.error(data.message || "Code promo invalide");
       }
     } catch (error) {
       console.error("Promo code validation error:", error);
-      toast.error("Failed to validate promo code");
+      toast.error("Echec de validation du code promo");
     } finally {
       setLoading(false);
     }
@@ -228,17 +228,17 @@ const CartPage = () => {
 
   const handleResetCart = () => {
     const confirmed = window.confirm(
-      "Are you sure you want to reset your cart?"
+      "Voulez-vous vraiment reinitialiser votre panier ?"
     );
     if (confirmed) {
       resetCart();
-      toast.success("Cart reset successfully!");
+      toast.success("Panier reinitialise avec succes !");
     }
   };
 
   const handleCheckout = async () => {
     if (!selectedAddress) {
-      toast.error("Please select a delivery address");
+      toast.error("Veuillez selectionner une adresse de livraison");
       return;
     }
     setLoading(true);
@@ -263,8 +263,8 @@ const CartPage = () => {
         resetCart();
         toast.success(
           paymentMethod === "cod"
-            ? "Order placed with Cash on Delivery"
-            : "Installment order created successfully"
+            ? "Commande validee en paiement a la livraison"
+            : "Commande en paiement echelonné creee avec succes"
         );
         window.location.href = `/success?orderNumber=${order.orderNumber}`;
         return;
@@ -274,19 +274,19 @@ const CartPage = () => {
       if (checkoutUrl) {
         window.location.href = checkoutUrl;
       } else {
-        toast.error("Unable to start checkout");
+        toast.error("Impossible de lancer le paiement");
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
       const message =
-        error instanceof Error ? error.message : "Checkout failed. Please try again.";
+        error instanceof Error ? error.message : "Echec du paiement. Veuillez reessayer.";
       if (
         message.includes("STRIPE_SECRET_KEY") ||
         message.includes("NEXT_PUBLIC_BASE_URL")
       ) {
-        toast.error("Card payment is not configured yet. Please check Stripe environment variables.");
+        toast.error("Le paiement par carte n'est pas encore configure. Verifiez les variables Stripe.");
       } else {
-        toast.error("Checkout failed. Please try again.");
+        toast.error("Echec du paiement. Veuillez reessayer.");
       }
     } finally {
       setLoading(false);
@@ -300,7 +300,7 @@ const CartPage = () => {
             <>
               <div className="flex items-center gap-2 py-5">
                 <ShoppingBag className="text-darkColor" />
-                <Title>Shopping Cart</Title>
+                <Title>Panier</Title>
               </div>
               <div className="grid lg:grid-cols-3 md:gap-8">
                 <div className="lg:col-span-2 rounded-lg">
@@ -335,13 +335,13 @@ const CartPage = () => {
                                   {product?.name}
                                 </h2>
                                 <p className="text-sm capitalize">
-                                  Variant:{" "}
+                                  Variante :{" "}
                                   <span className="font-semibold">
                                     {product?.variant}
                                   </span>
                                 </p>
                                 <p className="text-sm capitalize">
-                                  Status:{" "}
+                                  Statut :{" "}
                                   <span className="font-semibold">
                                     {product?.status}
                                   </span>
@@ -357,7 +357,7 @@ const CartPage = () => {
                                       />
                                     </TooltipTrigger>
                                     <TooltipContent className="font-bold">
-                                      Add to Favorite
+                                      Ajouter aux favoris
                                     </TooltipContent>
                                   </Tooltip>
                                   <Tooltip>
@@ -366,14 +366,14 @@ const CartPage = () => {
                                         onClick={() => {
                                           deleteCartProduct(product?._id);
                                           toast.success(
-                                            "Product deleted successfully!"
+                                            "Produit supprime avec succes !"
                                           );
                                         }}
                                         className="w-4 h-4 md:w-5 md:h-5 mr-1 text-gray-500 hover:text-red-600 hoverEffect"
                                       />
                                     </TooltipTrigger>
                                     <TooltipContent className="font-bold bg-red-600">
-                                      Delete product
+                                      Supprimer le produit
                                     </TooltipContent>
                                   </Tooltip>
                                 </TooltipProvider>
@@ -395,7 +395,7 @@ const CartPage = () => {
                       className="m-5 font-semibold"
                       variant="destructive"
                     >
-                      Reset Cart
+                      Reinitialiser le panier
                     </Button>
                   </div>
                 </div>
@@ -403,12 +403,12 @@ const CartPage = () => {
                   <div className="lg:col-span-1">
                     <div className="hidden md:inline-block w-full bg-white p-6 rounded-lg border">
                       <h2 className="text-xl font-semibold mb-4">
-                        Order Summary
+                        Resume de commande
                       </h2>
                       <div className="space-y-4">
                         {loyalty && (
                           <div className="rounded-md border p-3 bg-gray-50">
-                            <p className="text-sm font-semibold">Loyalty Card</p>
+                            <p className="text-sm font-semibold">Carte fidelite</p>
                             <p className="text-xs text-gray-600">
                               {loyalty.cardNumber} - {loyalty.tier} -{" "}
                               {loyalty.points} pts
@@ -416,12 +416,12 @@ const CartPage = () => {
                           </div>
                         )}
                         <div className="space-y-2">
-                          <span className="text-sm font-medium">Promo Code</span>
+                          <span className="text-sm font-medium">Code promo</span>
                           <div className="flex gap-2">
                             <input
                               value={promoCode}
                               onChange={(event) => setPromoCode(event.target.value)}
-                              placeholder="Enter promo code"
+                              placeholder="Saisir le code promo"
                               className="flex-1 border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-shop_dark_green/40"
                             />
                             <Button
@@ -430,7 +430,7 @@ const CartPage = () => {
                               onClick={applyPromoCode}
                               disabled={loading}
                             >
-                              Apply
+                              Appliquer
                             </Button>
                           </div>
                           {promoState && (
@@ -438,14 +438,14 @@ const CartPage = () => {
                               className={`text-xs ${promoState.valid ? "text-green-600" : "text-red-600"}`}
                             >
                               {promoState.valid
-                                ? `Applied - discount ${promoState.discountAmount.toFixed(2)} MAD`
-                                : promoState.message || "Promo not valid"}
+                                ? `Applique - remise ${promoState.discountAmount.toFixed(2)} MAD`
+                                : promoState.message || "Promo non valide"}
                             </p>
                           )}
                         </div>
                         <div className="space-y-2">
                           <span className="text-sm font-medium">
-                            Payment Method
+                            Methode de paiement
                           </span>
                           <RadioGroup
                             value={paymentMethod}
@@ -457,14 +457,14 @@ const CartPage = () => {
                               <RadioGroupItem value="cod" id="pay-cod" />
                               <Label htmlFor="pay-cod" className="flex items-center gap-2">
                                 <HandCoins size={16} />
-                                Cash on Delivery
+                                Paiement a la livraison
                               </Label>
                             </div>
                             <div className="flex items-center space-x-2">
                               <RadioGroupItem value="cmi_card" id="pay-cmi" />
                               <Label htmlFor="pay-cmi" className="flex items-center gap-2">
                                 <CreditCard size={16} />
-                                Card Payment (Stripe)
+                                Paiement par carte (Stripe)
                               </Label>
                             </div>
                             {canUseInstallments && (
@@ -478,19 +478,19 @@ const CartPage = () => {
                                   className="flex items-center gap-2"
                                 >
                                   <Landmark size={16} />
-                                  Payment by Installments
+                                  Paiement echelonne
                                 </Label>
                               </div>
                             )}
                           </RadioGroup>
                           {!canUseInstallments && (
                             <p className="text-xs text-gray-500">
-                              Installments are only available for eligible users.
+                              Le paiement echelonne est reserve aux utilisateurs eligibles.
                             </p>
                           )}
                           {paymentMethod === "installments" && (
                             <div className="pt-1">
-                              <Label className="text-xs">Installment Plan</Label>
+                              <Label className="text-xs">Plan d&apos;echelonnement</Label>
                               <select
                                 value={installmentMonths}
                                 onChange={(event) =>
@@ -498,29 +498,29 @@ const CartPage = () => {
                                 }
                                 className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
                               >
-                                <option value={3}>3 months</option>
-                                <option value={6}>6 months</option>
-                                <option value={12}>12 months</option>
+                                <option value={3}>3 mois</option>
+                                <option value={6}>6 mois</option>
+                                <option value={12}>12 mois</option>
                               </select>
                               <p className="text-xs text-gray-500 mt-1">
-                                Approx monthly:{" "}
+                                Mensualite estimee :{" "}
                                 {(finalTotal / Math.max(installmentMonths, 1)).toFixed(2)} MAD
                               </p>
                             </div>
                           )}
                           {paymentMethod === "cmi_card" && (
                             <p className="text-xs text-gray-500">
-                              You will be redirected to Stripe Checkout to enter your card details securely.
-                              Card numbers and CVC are not stored in this app.
+                              Vous serez redirige vers Stripe pour saisir vos informations de carte en toute securite.
+                              Les numeros de carte et le CVC ne sont pas stockes dans cette application.
                             </p>
                           )}
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>SubTotal</span>
+                          <span>Sous-total</span>
                           <PriceFormatter amount={subtotal} />
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>Discount</span>
+                          <span>Remise</span>
                           <PriceFormatter amount={promoDiscount} />
                         </div>
                         <Separator />
@@ -538,12 +538,12 @@ const CartPage = () => {
                           onClick={handleCheckout}
                         >
                           {loading
-                            ? "Please wait..."
+                            ? "Veuillez patienter..."
                             : paymentMethod === "cod"
-                              ? "Place COD Order"
+                              ? "Valider la commande (livraison)"
                               : paymentMethod === "installments"
-                                ? "Create Installment Order"
-                                : "Proceed to Checkout"}
+                                ? "Creer la commande echelonnee"
+                                : "Passer au paiement"}
                         </Button>
                       </div>
                     </div>
@@ -551,7 +551,7 @@ const CartPage = () => {
                       <div className="bg-white rounded-md mt-5">
                         <Card>
                           <CardHeader>
-                            <CardTitle>Delivery Address</CardTitle>
+                            <CardTitle>Adresse de livraison</CardTitle>
                           </CardHeader>
                           <CardContent>
                             <RadioGroup
@@ -584,7 +584,7 @@ const CartPage = () => {
                                     <span className="text-sm text-black/60">
                                       {address.address}, {address.city},{" "}
                                       {address.state} {address.zip} -{" "}
-                                      {(address as Address & { phone?: string }).phone || "N/A"}
+                                      {(address as Address & { phone?: string }).phone || "N/D"}
                                     </span>
                                   </Label>
                                 </div>
@@ -596,20 +596,20 @@ const CartPage = () => {
                             >
                               <DialogTrigger asChild>
                                 <Button variant="outline" className="w-full mt-4">
-                                  Add New Address
+                                  Ajouter une nouvelle adresse
                                 </Button>
                               </DialogTrigger>
                               <DialogContent>
                                 <DialogHeader>
-                                  <DialogTitle>Add Delivery Address</DialogTitle>
+                                  <DialogTitle>Ajouter une adresse de livraison</DialogTitle>
                                   <DialogDescription>
-                                    Save a new address for your checkout.
+                                    Enregistrez une nouvelle adresse pour votre commande.
                                   </DialogDescription>
                                 </DialogHeader>
                                 <div className="grid gap-3">
                                   <input
                                     className="border rounded-md px-3 py-2 text-sm"
-                                    placeholder="Address Name (Home, Work)"
+                                    placeholder="Nom de l'adresse (Maison, Travail)"
                                     value={addressForm.name}
                                     onChange={(event) =>
                                       onAddressFieldChange("name", event.target.value)
@@ -617,7 +617,7 @@ const CartPage = () => {
                                   />
                                   <input
                                     className="border rounded-md px-3 py-2 text-sm"
-                                    placeholder="Street Address"
+                                    placeholder="Adresse"
                                     value={addressForm.address}
                                     onChange={(event) =>
                                       onAddressFieldChange("address", event.target.value)
@@ -625,7 +625,7 @@ const CartPage = () => {
                                   />
                                   <input
                                     className="border rounded-md px-3 py-2 text-sm"
-                                    placeholder="City"
+                                    placeholder="Ville"
                                     value={addressForm.city}
                                     onChange={(event) =>
                                       onAddressFieldChange("city", event.target.value)
@@ -634,7 +634,7 @@ const CartPage = () => {
                                   <div className="grid grid-cols-2 gap-3">
                                     <input
                                       className="border rounded-md px-3 py-2 text-sm"
-                                      placeholder="Phone Number"
+                                      placeholder="Numero de telephone"
                                       value={addressForm.phone}
                                       onChange={(event) =>
                                         onAddressFieldChange("phone", event.target.value)
@@ -642,7 +642,7 @@ const CartPage = () => {
                                     />
                                     <input
                                       className="border rounded-md px-3 py-2 text-sm"
-                                      placeholder="State (ex: CA)"
+                                      placeholder="Region (ex: CA)"
                                       value={addressForm.state}
                                       onChange={(event) =>
                                         onAddressFieldChange(
@@ -654,7 +654,7 @@ const CartPage = () => {
                                   </div>
                                   <input
                                     className="border rounded-md px-3 py-2 text-sm"
-                                    placeholder="ZIP"
+                                    placeholder="Code postal"
                                     value={addressForm.zip}
                                     onChange={(event) =>
                                       onAddressFieldChange("zip", event.target.value)
@@ -668,7 +668,7 @@ const CartPage = () => {
                                         onAddressFieldChange("default", event.target.checked)
                                       }
                                     />
-                                    Set as default address
+                                    Definir comme adresse par defaut
                                   </label>
                                 </div>
                                 <DialogFooter>
@@ -677,14 +677,14 @@ const CartPage = () => {
                                     variant="outline"
                                     onClick={() => setIsAddressDialogOpen(false)}
                                   >
-                                    Cancel
+                                    Annuler
                                   </Button>
                                   <Button
                                     type="button"
                                     onClick={createAddress}
                                     disabled={loading}
                                   >
-                                    Save Address
+                                    Enregistrer l&apos;adresse
                                   </Button>
                                 </DialogFooter>
                               </DialogContent>
@@ -698,22 +698,22 @@ const CartPage = () => {
                 {/* Order summary for mobile view */}
                 <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
                   <div className="bg-white p-4 rounded-lg border mx-4">
-                    <h2>Order Summary</h2>
+                    <h2>Resume de commande</h2>
                     <div className="space-y-4">
                       {loyalty && (
                         <div className="rounded-md border p-3 bg-gray-50">
-                          <p className="text-sm font-semibold">Loyalty Card</p>
+                          <p className="text-sm font-semibold">Carte fidelite</p>
                           <p className="text-xs text-gray-600">
                             {loyalty.cardNumber} - {loyalty.tier} - {loyalty.points} pts
                           </p>
                         </div>
                       )}
                       <div className="flex items-center justify-between">
-                        <span>SubTotal</span>
+                        <span>Sous-total</span>
                         <PriceFormatter amount={subtotal} />
                       </div>
                       <div className="flex items-center justify-between">
-                        <span>Discount</span>
+                        <span>Remise</span>
                         <PriceFormatter amount={promoDiscount} />
                       </div>
                       <Separator />
@@ -730,7 +730,7 @@ const CartPage = () => {
                         disabled={loading}
                         onClick={handleCheckout}
                       >
-                        {loading ? "Please wait..." : "Proceed to Checkout"}
+                        {loading ? "Veuillez patienter..." : "Passer au paiement"}
                       </Button>
                     </div>
                   </div>
@@ -749,3 +749,5 @@ const CartPage = () => {
 };
 
 export default CartPage;
+
+

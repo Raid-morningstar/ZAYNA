@@ -15,7 +15,7 @@ const CategoryPage = async ({
     <div className="py-10">
       <Container>
         <Title>
-          Products by Category:{" "}
+          Produits par categorie :{" "}
           <span className="font-bold text-green-600 capitalize tracking-wide">
             {slug && slug}
           </span>

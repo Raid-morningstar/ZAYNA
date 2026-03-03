@@ -86,7 +86,7 @@ const Shop = ({ categories, brands }: Props) => {
         <div className="sticky top-0 z-10 mb-5">
           <div className="flex items-center justify-between">
             <Title className="text-lg uppercase tracking-wide">
-              Get the products as your needs
+              Trouvez les produits selon vos besoins
             </Title>
             {(selectedCategory !== null ||
               selectedBrand !== null ||
@@ -99,7 +99,7 @@ const Shop = ({ categories, brands }: Props) => {
                 }}
                 className="text-shop_dark_green underline text-sm mt-2 font-medium hover:text-darkRed hoverEffect"
               >
-                Reset Filters
+                Reinitialiser les filtres
               </button>
             )}
           </div>
@@ -127,7 +127,7 @@ const Shop = ({ categories, brands }: Props) => {
                 <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
                   <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />
                   <p className="font-semibold tracking-wide text-base">
-                    Product is loading . . .
+                    Chargement des produits . . .
                   </p>
                 </div>
               ) : products?.length > 0 ? (

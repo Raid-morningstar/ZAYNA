@@ -29,7 +29,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <ProductSideMenu product={product} />
         {product?.status === "sale" ? (
           <p className="absolute top-2 left-2 z-10 text-xs border border-darkColor/50 px-2 rounded-full group-hover:border-lightGreen hover:text-shop_dark_green hoverEffect">
-            Sale!
+            Promo !
           </p>
         ) : (
           <Link
@@ -63,15 +63,15 @@ const ProductCard = ({ product }: { product: Product }) => {
               />
             ))}
           </div>
-          <p className="text-lightText text-xs tracking-wide">5 Reviews</p>
+          <p className="text-lightText text-xs tracking-wide">5 avis</p>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <p className="font-medium">In Stock</p>
+          <p className="font-medium">Stock</p>
           <p
             className={`${product?.stock === 0 ? "text-red-600" : "text-shop_dark_green/80 font-semibold"}`}
           >
-            {(product?.stock as number) > 0 ? product?.stock : "unavailable"}
+            {(product?.stock as number) > 0 ? product?.stock : "indisponible"}
           </p>
         </div>
 

@@ -22,11 +22,11 @@ const WishListProducts = () => {
 
   const handleResetWishlist = () => {
     const confirmReset = window.confirm(
-      "Are you sure you want to reset your wishlist?"
+      "Voulez-vous vraiment reinitialiser votre liste de souhaits ?"
     );
     if (confirmReset) {
       resetFavorite();
-      toast.success("Wishlist reset successfully");
+      toast.success("Liste de souhaits reinitialisee avec succes");
     }
   };
 
@@ -40,11 +40,11 @@ const WishListProducts = () => {
                 <tr className="bg-black/5">
                   <th className="p-2 text-left">Image</th>
                   <th className="p-2 text-left hidden md:table-cell">
-                    Category
+                    Categorie
                   </th>
                   <th className="p-2 text-left hidden md:table-cell">Type</th>
-                  <th className="p-2 text-left hidden md:table-cell">Status</th>
-                  <th className="p-2 text-left">Price</th>
+                  <th className="p-2 text-left hidden md:table-cell">Statut</th>
+                  <th className="p-2 text-left">Prix</th>
                   <th className="p-2 text-center md:text-left">Action</th>
                 </tr>
               </thead>
@@ -57,7 +57,7 @@ const WishListProducts = () => {
                         <X
                           onClick={() => {
                             removeFromFavorite(product?._id);
-                            toast.success("Product removed from wishlist");
+                            toast.success("Produit retire de la liste de souhaits");
                           }}
                           size={18}
                           className="hover:text-red-600 hover:cursor-pointer hoverEffect"
@@ -96,8 +96,8 @@ const WishListProducts = () => {
                         } font-medium text-sm hidden md:table-cell`}
                       >
                         {(product?.stock as number) > 0
-                          ? "In Stock"
-                          : "Out of Stock"}
+                          ? "En stock"
+                          : "Rupture de stock"}
                       </td>
                       <td className="p-2">
                         <PriceFormatter amount={product?.price} />
@@ -114,7 +114,7 @@ const WishListProducts = () => {
             {visibleProducts < favoriteProduct?.length && (
               <div className="my-5">
                 <Button variant="outline" onClick={loadMore}>
-                  Load More
+                  Voir plus
                 </Button>
               </div>
             )}
@@ -124,7 +124,7 @@ const WishListProducts = () => {
                   onClick={() => setVisibleProducts(10)}
                   variant="outline"
                 >
-                  Load Less
+                  Voir moins
                 </Button>
               </div>
             )}
@@ -136,7 +136,7 @@ const WishListProducts = () => {
               variant="destructive"
               size="lg"
             >
-              Reset Wishlist
+              Reinitialiser la liste
             </Button>
           )}
         </>
@@ -151,14 +151,14 @@ const WishListProducts = () => {
           </div>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight">
-              Your wishlist is empty
+              Votre liste de souhaits est vide
             </h2>
             <p className="text-sm text-muted-foreground">
-              Items added to your wishlist will appear here
+              Les produits ajoutes a votre liste apparaitront ici
             </p>
           </div>
           <Button asChild>
-            <Link href="/shop">Continue Shopping</Link>
+            <Link href="/shop">Continuer vos achats</Link>
           </Button>
         </div>
       )}
