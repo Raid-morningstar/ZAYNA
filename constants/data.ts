@@ -23,9 +23,3 @@ export const categoriesData = [
   { title: "Bucco-Dentaire", href: "bucco-dentaire" },
   { title: "Maquillage", href: "maquillage" },
 ];
-export const productType = [
-  { title: "Gadget", value: "gadget" },
-  { title: "Appareils", value: "appliances" },
-  { title: "Refrigerateurs", value: "refrigerators" },
-  { title: "Autres", value: "others" },
-];

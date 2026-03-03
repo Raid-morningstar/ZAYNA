@@ -3,6 +3,7 @@ import React from "react";
 import Title from "../Title";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Label } from "../ui/label";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 interface Props {
   categories: Category[];
@@ -19,27 +20,32 @@ const CategoryList = ({
     <div className="w-full bg-white p-5">
       <Title className="text-base font-black">Categories de produits</Title>
       <RadioGroup value={selectedCategory || ""} className="mt-2 space-y-1">
-        {categories.map((category) => (
-          <div
-            onClick={() => {
-              setSelectedCategory(category.slug?.current as string);
-            }}
-            key={category._id}
-            className="flex items-center space-x-2 hover:cursor-pointer"
-          >
-            <RadioGroupItem
-              value={category.slug?.current as string}
-              id={category.slug?.current}
-              className="rounded-sm"
-            />
-            <Label
-              htmlFor={category.slug?.current}
-              className={`${selectedCategory === category.slug?.current ? "font-semibold text-shop_dark_green" : "font-normal"}`}
+        {categories.map((category) => {
+          const Icon = getCategoryIcon(category.title || "");
+
+          return (
+            <div
+              onClick={() => {
+                setSelectedCategory(category.slug?.current as string);
+              }}
+              key={category._id}
+              className="flex items-center space-x-2 hover:cursor-pointer"
             >
-              {category.title}
-            </Label>
-          </div>
-        ))}
+              <RadioGroupItem
+                value={category.slug?.current as string}
+                id={category.slug?.current}
+                className="rounded-sm"
+              />
+              <Label
+                htmlFor={category.slug?.current}
+                className={`inline-flex items-center gap-2 ${selectedCategory === category.slug?.current ? "font-semibold text-shop_dark_green" : "font-normal"}`}
+              >
+                <Icon className="h-4 w-4" />
+                {category.title}
+              </Label>
+            </div>
+          );
+        })}
       </RadioGroup>
       {selectedCategory && (
         <button

@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import { getCategoryIcon } from "@/lib/category-icons";
 interface Props {
   categories: Category[];
   slug: string;
@@ -62,15 +63,22 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   return (
     <div className="py-5 flex flex-col md:flex-row items-start gap-5">
       <div className="flex flex-col md:min-w-40 border">
-        {categories.map((item) => (
-          <Button
-            onClick={() => handleCategoryChange(item.slug?.current as string)}
-            key={item._id}
-            className={`bg-transparent border-0 p-0  rounded-none text-darkColor shadow-none hover:bg-shop_orange hover:text-white font-semibold hoverEffect border-b last:border-b-0 transition-colors capitalize ${item.slug?.current === currentSlug && "bg-shop_orange text-white border-shop_orange"}`}
-          >
-            <p className="w-full text-left px-2">{item.title}</p>
-          </Button>
-        ))}
+        {categories.map((item) => {
+          const Icon = getCategoryIcon(item.title || "");
+
+          return (
+            <Button
+              onClick={() => handleCategoryChange(item.slug?.current as string)}
+              key={item._id}
+              className={`bg-transparent border-0 p-0 rounded-none text-darkColor shadow-none hover:bg-shop_orange hover:text-white font-semibold hoverEffect border-b last:border-b-0 transition-colors capitalize ${item.slug?.current === currentSlug && "bg-shop_orange text-white border-shop_orange"}`}
+            >
+              <p className="w-full text-left px-2 inline-flex items-center gap-2">
+                <Icon className="h-4 w-4" />
+                {item.title}
+              </p>
+            </Button>
+          );
+        })}
       </div>
       <div className="flex-1">
         {loading ? (

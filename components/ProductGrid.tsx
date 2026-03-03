@@ -8,19 +8,39 @@ import NoProductAvailable from "./NoProductAvailable";
 import { Loader2 } from "lucide-react";
 import Container from "./Container";
 import HomeTabbar from "./HomeTabbar";
-import { productType } from "@/constants/data";
-import { Product } from "@/sanity.types";
+import { Category, Product } from "@/sanity.types";
 
-const ProductGrid = () => {
+type HomeCategory = Pick<Category, "_id" | "title" | "slug">;
+
+const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
+
+  const tabCategories = (categories || []).filter(
+    (category): category is HomeCategory & { slug: { current: string } } =>
+      Boolean(category?._id && category?.title && category?.slug?.current)
+  );
+
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    tabCategories[0]?._id || ""
+  );
 
   useEffect(() => {
+    if (!selectedCategoryId && tabCategories.length) {
+      setSelectedCategoryId(tabCategories[0]._id);
+    }
+  }, [selectedCategoryId, tabCategories]);
+
+  useEffect(() => {
+    if (!selectedCategoryId) {
+      setProducts([]);
+      return;
+    }
+
     const fetchData = async () => {
       setLoading(true);
       try {
-        const query = `*[_type == "product" && variant == $variant] | order(name asc){
+        const query = `*[_type == "product" && references($categoryId)] | order(name asc){
   _id,
   name,
   slug,
@@ -33,7 +53,7 @@ const ProductGrid = () => {
   variant,
   "categories": categories[]->title
 }`;
-        const params = { variant: selectedTab.toLowerCase() };
+        const params = { categoryId: selectedCategoryId };
         const response = await client.fetch<Product[]>(query, params);
         setProducts(response || []);
       } catch (error) {
@@ -43,11 +63,23 @@ const ProductGrid = () => {
       }
     };
     fetchData();
-  }, [selectedTab]);
+  }, [selectedCategoryId]);
+
+  const selectedCategoryTitle =
+    tabCategories.find((category) => category._id === selectedCategoryId)
+      ?.title || "Cette categorie";
 
   return (
     <Container className="flex flex-col lg:px-0 my-10">
-      <HomeTabbar selectedTab={selectedTab} onTabSelect={setSelectedTab} />
+      <HomeTabbar
+        categories={tabCategories.map((category) => ({
+          _id: category._id,
+          title: category.title || "",
+          slug: category.slug.current,
+        }))}
+        selectedCategoryId={selectedCategoryId}
+        onCategorySelect={setSelectedCategoryId}
+      />
       {loading ? (
         <div className="flex flex-col items-center justify-center py-10 min-h-80 space-y-4 text-center bg-gray-100 rounded-lg w-full mt-10">
           <motion.div className="flex items-center space-x-2 text-blue-600">
@@ -73,7 +105,7 @@ const ProductGrid = () => {
           </>
         </div>
       ) : (
-        <NoProductAvailable selectedTab={selectedTab} />
+        <NoProductAvailable selectedTab={selectedCategoryTitle} />
       )}
     </Container>
   );
