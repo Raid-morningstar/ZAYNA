@@ -6,10 +6,10 @@ import CartUserGuard from "@/components/CartUserGuard";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s - Boutique Shopcart",
-    default: "Boutique Shopcart",
+    template: "%s - Zayna",
+    default: "Zayna",
   },
-  description: "Boutique en ligne Shopcart, tout ce dont vous avez besoin au meme endroit.",
+  description: "Boutique en ligne Zayna, tout ce dont vous avez besoin au meme endroit.",
 };
 
 export default function RootLayout({
