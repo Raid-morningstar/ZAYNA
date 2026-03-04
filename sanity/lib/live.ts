@@ -1,4 +1,5 @@
 import { client } from "./client";
+import { fetchWithRetry } from "./fetchWithRetry";
 
 type SanityFetchArgs = {
   query: string;
@@ -11,9 +12,13 @@ export const sanityFetch = async <T>({
   params = {},
   revalidate = 120,
 }: SanityFetchArgs) => {
-  const data = await client.fetch<T>(query, params, {
-    next: { revalidate },
-  });
+  const data = await fetchWithRetry(
+    () =>
+      client.fetch<T>(query, params, {
+        next: { revalidate },
+      }),
+    { retries: 1, retryDelayMs: 400 }
+  );
   return { data };
 };
 

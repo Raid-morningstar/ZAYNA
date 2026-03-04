@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { fetchWithRetry } from "@/sanity/lib/fetchWithRetry";
 interface Props {
   categories: Category[];
   slug: string;
@@ -25,10 +26,17 @@ const CategoryProducts = ({ categories, slug }: Props) => {
     router.push(`/category/${newSlug}`, { scroll: false }); // Update URL without
   };
 
-  const fetchProducts = async (categorySlug: string) => {
-    setLoading(true);
-    try {
-      const query = `
+  useEffect(() => {
+    setCurrentSlug(slug);
+  }, [slug]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      setLoading(true);
+      try {
+        const query = `
         *[_type == "product"
           && references(*[_type == "category" && slug.current == $categorySlug][0]._id)
         ] | order(name asc) {
@@ -45,19 +53,34 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           "categories": categories[]->title
         }
       `;
-      const data = await client.fetch<Product[]>(query, {
-        categorySlug,
-      });
-      setProducts(data || []);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      setProducts([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchProducts(currentSlug);
+        const data = await fetchWithRetry(
+          () =>
+            client.fetch<Product[]>(query, {
+              categorySlug: currentSlug,
+            }),
+          { retries: 1, retryDelayMs: 400 }
+        );
+
+        if (!cancelled) {
+          setProducts(data || []);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Error fetching products:", error);
+          setProducts([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    run();
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentSlug]);
 
   return (

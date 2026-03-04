@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import Container from "./Container";
 import HomeTabbar from "./HomeTabbar";
 import { Category, Product } from "@/sanity.types";
+import { fetchWithRetry } from "@/sanity/lib/fetchWithRetry";
 
 type HomeCategory = Pick<Category, "_id" | "title" | "slug">;
 
@@ -37,6 +38,8 @@ const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
       return;
     }
 
+    let cancelled = false;
+
     const fetchData = async () => {
       setLoading(true);
       try {
@@ -54,15 +57,30 @@ const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
   "categories": categories[]->title
 }`;
         const params = { categoryId: selectedCategoryId };
-        const response = await client.fetch<Product[]>(query, params);
-        setProducts(response || []);
+        const response = await fetchWithRetry(
+          () => client.fetch<Product[]>(query, params),
+          { retries: 1, retryDelayMs: 400 }
+        );
+
+        if (!cancelled) {
+          setProducts(response || []);
+        }
       } catch (error) {
-        console.log("Product fetching Error", error);
+        if (!cancelled) {
+          console.log("Product fetching Error", error);
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
     fetchData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedCategoryId]);
 
   const selectedCategoryTitle =

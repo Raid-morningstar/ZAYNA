@@ -1,6 +1,6 @@
 "use client";
 import { BRANDS_QUERYResult, Category, Product } from "@/sanity.types";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Container from "./Container";
 import Title from "./Title";
 import CategoryList from "./shop/CategoryList";
@@ -11,6 +11,7 @@ import { client } from "@/sanity/lib/client";
 import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import { fetchWithRetry } from "@/sanity/lib/fetchWithRetry";
 
 interface Props {
   categories: Category[];
@@ -29,8 +30,12 @@ const Shop = ({ categories, brands }: Props) => {
     brandParams || null
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+  const requestIdRef = useRef(0);
 
   const fetchProducts = useCallback(async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
+
     setLoading(true);
     try {
       let minPrice = 0;
@@ -60,20 +65,28 @@ const Shop = ({ categories, brands }: Props) => {
         "categories": categories[]->title
       }
     `;
-      const data = await client.fetch<Product[]>(
-        query,
-        {
-          selectedCategory: selectedCategory ?? "",
-          selectedBrand: selectedBrand ?? "",
-          minPrice,
-          maxPrice,
-        }
+      const data = await fetchWithRetry(
+        () =>
+          client.fetch<Product[]>(query, {
+            selectedCategory: selectedCategory ?? "",
+            selectedBrand: selectedBrand ?? "",
+            minPrice,
+            maxPrice,
+          }),
+        { retries: 1, retryDelayMs: 400 }
       );
-      setProducts(data || []);
+      if (requestIdRef.current === requestId) {
+        setProducts(data || []);
+      }
     } catch (error) {
-      console.log("Shop product fetching Error", error);
+      if (requestIdRef.current === requestId) {
+        console.log("Shop product fetching Error", error);
+        setProducts([]);
+      }
     } finally {
-      setLoading(false);
+      if (requestIdRef.current === requestId) {
+        setLoading(false);
+      }
     }
   }, [selectedCategory, selectedBrand, selectedPrice]);
 
