@@ -337,7 +337,7 @@ export default function StudioCustomersBoard() {
             </Grid>
 
             <Card
-              padding={4}
+              padding={5}
               radius={2}
               style={{
                 background: palette.card,
@@ -362,7 +362,7 @@ export default function StudioCustomersBoard() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       style={{
-                        minWidth: 220,
+                        minWidth: 260,
                         borderRadius: 8,
                         border: `1px solid ${palette.border}`,
                         background: palette.card,
@@ -400,7 +400,7 @@ export default function StudioCustomersBoard() {
 
                 {filteredRows.length ? (
                   <div className="zayna-scroll" style={{overflowX: 'auto'}}>
-                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 940}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 1120}}>
                       <thead>
                         <tr>
                           {[
@@ -427,7 +427,10 @@ export default function StudioCustomersBoard() {
                                 fontSize: 12,
                                 color: palette.muted,
                                 borderBottom: `1px solid ${palette.border}`,
-                                paddingBottom: 10,
+                                padding: '0 12px 10px 0',
+                                ...(label === 'Orders' ? {paddingRight: 16} : {}),
+                                ...(label === 'Paid Orders' ? {paddingRight: 16} : {}),
+                                ...(label === 'Total Spent' ? {paddingRight: 20} : {}),
                               }}
                             >
                               {label}
@@ -440,7 +443,7 @@ export default function StudioCustomersBoard() {
                           <tr key={row.profile._id}>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                               }}
@@ -454,14 +457,19 @@ export default function StudioCustomersBoard() {
                                 </Text>
                               </Stack>
                             </td>
-                            <td style={{padding: '11px 0', borderBottom: `1px solid ${palette.border}`}}>
+                            <td
+                              style={{
+                                padding: '14px 12px 14px 0',
+                                borderBottom: `1px solid ${palette.border}`,
+                              }}
+                            >
                               <span style={getBadgeStyle(row.segment, theme, 'segment')}>
                                 {toStatusLabel(row.segment)}
                               </span>
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 16px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -471,7 +479,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 16px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -481,7 +489,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 20px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -492,7 +500,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -502,7 +510,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -512,7 +520,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 12px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -522,7 +530,7 @@ export default function StudioCustomersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,

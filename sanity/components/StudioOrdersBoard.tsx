@@ -405,7 +405,10 @@ export default function StudioOrdersBoard() {
                                 fontSize: 12,
                                 color: palette.muted,
                                 borderBottom: `1px solid ${palette.border}`,
-                                paddingBottom: 10,
+                                padding: '0 12px 10px 0',
+                                ...(label === 'Qty' ? {paddingRight: 24} : {}),
+                                ...(label === 'Products / Stock' ? {paddingLeft: 20} : {}),
+                                ...(label === 'Total' ? {paddingRight: 18} : {}),
                               }}
                             >
                               {label}
@@ -418,7 +421,7 @@ export default function StudioOrdersBoard() {
                           <tr key={order._id || `${order.orderNumber || 'order'}-${index}`}>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                               }}
@@ -427,7 +430,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                               }}
@@ -443,7 +446,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -453,7 +456,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 24px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -463,7 +466,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 24px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -474,7 +477,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 12px 14px 20px',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 minWidth: 280,
@@ -522,7 +525,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 18px 14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -533,7 +536,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '14px 0',
+                                padding: '14px 12px 14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -541,12 +544,22 @@ export default function StudioOrdersBoard() {
                             >
                               {toStatusLabel(order.paymentMethod || '-')}
                             </td>
-                            <td style={{padding: '14px 0', borderBottom: `1px solid ${palette.border}`}}>
+                            <td
+                              style={{
+                                padding: '14px 12px 14px 0',
+                                borderBottom: `1px solid ${palette.border}`,
+                              }}
+                            >
                               <span style={getBadgeStyle(order.status, theme, 'order')}>
                                 {toStatusLabel(order.status)}
                               </span>
                             </td>
-                            <td style={{padding: '14px 0', borderBottom: `1px solid ${palette.border}`}}>
+                            <td
+                              style={{
+                                padding: '14px 12px 14px 0',
+                                borderBottom: `1px solid ${palette.border}`,
+                              }}
+                            >
                               <span style={getBadgeStyle(order.paymentStatus, theme, 'payment')}>
                                 {toStatusLabel(order.paymentStatus)}
                               </span>

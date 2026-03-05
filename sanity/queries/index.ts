@@ -109,28 +109,29 @@ const getMyOrders = async (userId: string) => {
     const orders = await sanityFetch<MY_ORDERS_QUERYResult>({
       query: MY_ORDERS_QUERY,
       params: { userId },
-      revalidate: 0,
+      revalidate: 20,
     });
     const rawOrders = orders?.data || [];
-    const deduped = rawOrders.reduce<MY_ORDERS_QUERYResult>((acc, order) => {
+    const byKey = new Map<string, MY_ORDERS_QUERYResult[number]>();
+
+    for (const order of rawOrders) {
       const key = order.orderNumber || order._id;
-      const existingIndex = acc.findIndex(
-        (item) => (item.orderNumber || item._id) === key
-      );
-      if (existingIndex === -1) {
-        acc.push(order);
-        return acc;
+      const existing = byKey.get(key);
+
+      if (!existing) {
+        byKey.set(key, order);
+        continue;
       }
 
-      const existingUpdatedAt = acc[existingIndex]?._updatedAt
-        ? new Date(acc[existingIndex]._updatedAt as string).getTime()
+      const existingUpdatedAt = existing?._updatedAt
+        ? new Date(existing._updatedAt as string).getTime()
         : 0;
       const currentUpdatedAt = order?._updatedAt
         ? new Date(order._updatedAt as string).getTime()
         : 0;
 
-      const existingOrderDate = acc[existingIndex]?.orderDate
-        ? new Date(acc[existingIndex].orderDate as string).getTime()
+      const existingOrderDate = existing?.orderDate
+        ? new Date(existing.orderDate as string).getTime()
         : 0;
       const currentOrderDate = order?.orderDate
         ? new Date(order.orderDate as string).getTime()
@@ -141,11 +142,11 @@ const getMyOrders = async (userId: string) => {
         (currentUpdatedAt === existingUpdatedAt &&
           currentOrderDate >= existingOrderDate)
       ) {
-        acc[existingIndex] = order;
+        byKey.set(key, order);
       }
+    }
 
-      return acc;
-    }, []);
+    const deduped = [...byKey.values()];
 
     return deduped;
   } catch (error) {

@@ -10,14 +10,11 @@ import { auth } from "@clerk/nextjs/server";
 import { FileX } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { unstable_noStore as noStore } from "next/cache";
 import React from "react";
 
 export const dynamic = "force-dynamic";
 
 const OrdersPage = async () => {
-  noStore();
-
   const { userId } = await auth();
   if (!userId) {
     return redirect("/");
@@ -27,35 +24,47 @@ const OrdersPage = async () => {
 
   return (
     <div>
-      <OrderStatusAutoRefresh intervalMs={10000} />
+      <OrderStatusAutoRefresh />
       <Container className="py-10">
         {orders?.length ? (
-          <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Liste des commandes</CardTitle>
+          <Card className="w-full border border-shop_light_green/20 shadow-sm">
+            <CardHeader className="border-b border-shop_light_green/15">
+              <CardTitle className="text-xl text-shop_dark_green">
+                Liste des commandes
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <ScrollArea>
                 <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-25 md:w-auto">
+                  <TableHeader className="bg-shop_light_green/5">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="w-25 md:w-auto text-[11px] uppercase tracking-wide text-shop_dark_green/80">
                         Numero de commande
                       </TableHead>
-                      <TableHead className="hidden md:table-cell">
+                      <TableHead className="hidden md:table-cell text-[11px] uppercase tracking-wide text-shop_dark_green/80">
                         Date
                       </TableHead>
-                      <TableHead>Client</TableHead>
-                      <TableHead className="hidden sm:table-cell">
+                      <TableHead className="text-[11px] uppercase tracking-wide text-shop_dark_green/80">
+                        Client
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell text-[11px] uppercase tracking-wide text-shop_dark_green/80">
                         Email
                       </TableHead>
-                      <TableHead>Total</TableHead>
-                      <TableHead>Statut</TableHead>
-                      <TableHead>Paiement</TableHead>
-                      <TableHead className="hidden sm:table-cell">
+                      <TableHead className="text-[11px] uppercase tracking-wide text-shop_dark_green/80">
+                        Total
+                      </TableHead>
+                      <TableHead className="text-[11px] uppercase tracking-wide text-shop_dark_green/80">
+                        Statut
+                      </TableHead>
+                      <TableHead className="text-[11px] uppercase tracking-wide text-shop_dark_green/80">
+                        Paiement
+                      </TableHead>
+                      <TableHead className="hidden sm:table-cell text-[11px] uppercase tracking-wide text-shop_dark_green/80">
                         Numero de facture
                       </TableHead>
-                      <TableHead className="text-center">Action</TableHead>
+                      <TableHead className="text-center text-[11px] uppercase tracking-wide text-shop_dark_green/80">
+                        Action
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <OrdersComponent orders={orders} />

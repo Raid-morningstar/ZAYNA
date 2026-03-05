@@ -2,6 +2,8 @@ import { backendClient } from "@/sanity/lib/backendClient";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const ADDRESSES_BY_USER_QUERY = `*[_type == "address" && (clerkUserId == $userId || email == $email)] | order(coalesce(createdAt, _createdAt) desc)`;
 
 export async function GET() {

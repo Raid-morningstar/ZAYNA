@@ -148,6 +148,13 @@ const DASHBOARD_CSS = `
   border-radius: 999px;
   background: rgba(201,168,76,.45);
 }
+.zayna-status-card {
+  transition: transform .22s ease, filter .22s ease;
+}
+.zayna-status-card:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.03);
+}
 `
 
 const currencyFormatter = new Intl.NumberFormat('fr-MA', {
@@ -558,6 +565,56 @@ export default function StudioDashboard() {
     metrics.revenueGrowth === null
       ? 'No revenue in previous month'
       : `${metrics.revenueGrowth >= 0 ? '+' : ''}${metrics.revenueGrowth.toFixed(1)}% vs last month`
+  const statusOverviewCards = [
+    {
+      key: 'pending',
+      label: 'Pending',
+      value: metrics.statusCounts.pending,
+      valueColor: palette.warning,
+      bg: theme === 'dark' ? 'rgba(255,192,90,.12)' : 'rgba(255,194,88,.16)',
+      border: theme === 'dark' ? 'rgba(255,192,90,.3)' : 'rgba(173,112,9,.24)',
+    },
+    {
+      key: 'processing',
+      label: 'Processing',
+      value: metrics.statusCounts.processing,
+      valueColor: palette.text,
+      bg: theme === 'dark' ? 'rgba(204,220,213,.1)' : 'rgba(53,82,73,.08)',
+      border: theme === 'dark' ? 'rgba(204,220,213,.24)' : 'rgba(53,82,73,.2)',
+    },
+    {
+      key: 'shipped',
+      label: 'Shipped',
+      value: metrics.statusCounts.shipped,
+      valueColor: '#7e96ff',
+      bg: theme === 'dark' ? 'rgba(120,138,255,.12)' : 'rgba(80,108,243,.14)',
+      border: theme === 'dark' ? 'rgba(120,138,255,.3)' : 'rgba(80,108,243,.24)',
+    },
+    {
+      key: 'delivered',
+      label: 'Delivered',
+      value: metrics.statusCounts.delivered,
+      valueColor: palette.success,
+      bg: theme === 'dark' ? 'rgba(39,199,139,.12)' : 'rgba(13,110,79,.14)',
+      border: theme === 'dark' ? 'rgba(39,199,139,.3)' : 'rgba(13,110,79,.24)',
+    },
+    {
+      key: 'cancelled',
+      label: 'Cancelled',
+      value: metrics.statusCounts.cancelled,
+      valueColor: palette.danger,
+      bg: theme === 'dark' ? 'rgba(255,111,118,.12)' : 'rgba(232,87,104,.14)',
+      border: theme === 'dark' ? 'rgba(255,111,118,.28)' : 'rgba(232,87,104,.24)',
+    },
+    {
+      key: 'failed-payments',
+      label: 'Failed Payments',
+      value: metrics.statusCounts.failedPayments,
+      valueColor: palette.danger,
+      bg: theme === 'dark' ? 'rgba(255,111,118,.1)' : 'rgba(232,87,104,.12)',
+      border: theme === 'dark' ? 'rgba(255,111,118,.24)' : 'rgba(232,87,104,.2)',
+    },
+  ]
 
   const triggerReload = () => {
     setLoading(true)
@@ -921,30 +978,36 @@ export default function StudioDashboard() {
                     )}
                   </Stack>
                   <Grid columns={[2, 3]} gap={2}>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Pending</Text>
-                      <Heading size={1} style={{color: palette.warning}}>{metrics.statusCounts.pending}</Heading>
-                    </Card>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Processing</Text>
-                      <Heading size={1} style={{color: palette.text}}>{metrics.statusCounts.processing}</Heading>
-                    </Card>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Shipped</Text>
-                      <Heading size={1} style={{color: '#7e96ff'}}>{metrics.statusCounts.shipped}</Heading>
-                    </Card>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Delivered</Text>
-                      <Heading size={1} style={{color: palette.success}}>{metrics.statusCounts.delivered}</Heading>
-                    </Card>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Cancelled</Text>
-                      <Heading size={1} style={{color: palette.danger}}>{metrics.statusCounts.cancelled}</Heading>
-                    </Card>
-                    <Card padding={3} radius={2} style={{background: palette.card, border: `1px solid ${palette.border}`}}>
-                      <Text size={1} style={{color: palette.muted}}>Failed Payments</Text>
-                      <Heading size={1} style={{color: palette.danger}}>{metrics.statusCounts.failedPayments}</Heading>
-                    </Card>
+                    {statusOverviewCards.map((item) => (
+                      <div key={item.key} className="zayna-status-card">
+                        <Card
+                          padding={3}
+                          radius={2}
+                          style={{
+                            background: item.bg,
+                            border: `1px solid ${item.border}`,
+                            boxShadow: palette.shadow,
+                          }}
+                        >
+                          <Stack space={2} style={{textAlign: 'center'}}>
+                            <Text
+                              size={1}
+                              style={{
+                                color: palette.muted,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                                fontWeight: 600,
+                              }}
+                            >
+                              {item.label}
+                            </Text>
+                            <Heading size={2} style={{color: item.valueColor, lineHeight: 1}}>
+                              {item.value}
+                            </Heading>
+                          </Stack>
+                        </Card>
+                      </div>
+                    ))}
                   </Grid>
                 </Stack>
               </Card>

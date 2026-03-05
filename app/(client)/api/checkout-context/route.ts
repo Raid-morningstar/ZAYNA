@@ -2,6 +2,8 @@ import {backendClient} from "@/sanity/lib/backendClient";
 import {auth, currentUser} from "@clerk/nextjs/server";
 import {NextResponse} from "next/server";
 
+export const dynamic = "force-dynamic";
+
 const PROFILE_QUERY = `*[_type == "customerProfile" && clerkUserId == $userId][0]{
   loyaltyCardNumber,
   loyaltyPoints,

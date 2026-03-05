@@ -8,16 +8,29 @@ type OrderStatusAutoRefreshProps = {
 };
 
 const OrderStatusAutoRefresh = ({
-  intervalMs = 15000,
+  intervalMs = 30000,
 }: OrderStatusAutoRefreshProps) => {
   const router = useRouter();
 
   useEffect(() => {
-    const timer = window.setInterval(() => {
+    const refreshIfActive = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!document.hasFocus()) return;
       router.refresh();
-    }, intervalMs);
+    };
 
-    return () => window.clearInterval(timer);
+    const timer = window.setInterval(refreshIfActive, intervalMs);
+    const onFocus = () => refreshIfActive();
+    const onVisibilityChange = () => refreshIfActive();
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
   }, [router, intervalMs]);
 
   return null;

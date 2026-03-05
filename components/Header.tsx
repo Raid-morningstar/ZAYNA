@@ -22,13 +22,15 @@ const Header = async () => {
 
   return (
     <header className="sticky top-0 z-50 py-5 bg-white/70 backdrop-blur-md">
-      <Container className="flex items-center justify-between text-lightColor">
-        <div className="w-auto lg:w-1/3 flex items-center gap-2.5 justify-start lg:gap-0">
+      <Container className="flex items-center gap-3 lg:gap-5 text-lightColor">
+        <div className="w-auto lg:w-[12rem] xl:w-[14rem] flex items-center gap-2.5 justify-start lg:gap-0">
           <MobileMenu />
           <Logo />
         </div>
-        <HeaderMenu />
-        <div className="w-auto lg:w-1/3 flex items-center justify-end gap-3 sm:gap-5">
+        <div className="min-w-0 flex-1">
+          <HeaderMenu />
+        </div>
+        <div className="w-auto lg:w-[24rem] xl:w-[29rem] flex items-center justify-end gap-2.5 sm:gap-4 lg:gap-3 xl:gap-5">
           <SearchBar />
           <CartIcon />
           <FavoriteButton />

@@ -76,37 +76,45 @@ export async function createManualOrder(input: CreateManualOrderInput) {
     }
   }
 
-  const stockSnapshots = await Promise.all(
-    input.items.map(async (item) => {
-      const productId = item?.product?._id;
-      if (!productId) {
-        throw new Error("Invalid product in cart");
-      }
+  const quantityByProductId = new Map<string, number>();
+  for (const item of input.items) {
+    const productId = item?.product?._id;
+    if (!productId) {
+      throw new Error("Invalid product in cart");
+    }
+    const quantity = Math.max(1, item.quantity || 0);
+    quantityByProductId.set(productId, (quantityByProductId.get(productId) || 0) + quantity);
+  }
 
-      const product = await backendClient.fetch<
-        { _id: string; name?: string; stock?: number } | null
-      >(`*[_type == "product" && _id == $id][0]{_id, name, stock}`, {
-        id: productId,
-      });
-
-      if (!product || typeof product.stock !== "number") {
-        throw new Error(
-          `Product "${item.product?.name || "Unknown"}" is unavailable`
-        );
-      }
-
-      if (product.stock < item.quantity) {
-        throw new Error(
-          `Stock insuffisant pour "${product.name || item.product?.name || "Produit"}". Disponible: ${product.stock}, demande: ${item.quantity}.`
-        );
-      }
-
-      return {
-        productId: product._id,
-        nextStock: Math.max(product.stock - item.quantity, 0),
-      };
-    })
+  const productIds = [...quantityByProductId.keys()];
+  const products = await backendClient.fetch<Array<{_id: string; name?: string; stock?: number}>>(
+    `*[_type == "product" && _id in $ids]{_id, name, stock}`,
+    {ids: productIds}
   );
+  const productById = new Map(products.map((product) => [product._id, product]));
+
+  const stockSnapshots = productIds.map((productId) => {
+    const product = productById.get(productId);
+    const requestedQty = quantityByProductId.get(productId) || 0;
+
+    if (!product || typeof product.stock !== "number") {
+      const cartItem = input.items.find((item) => item?.product?._id === productId);
+      throw new Error(
+        `Product "${cartItem?.product?.name || "Unknown"}" is unavailable`
+      );
+    }
+
+    if (product.stock < requestedQty) {
+      throw new Error(
+        `Stock insuffisant pour "${product.name || "Produit"}". Disponible: ${product.stock}, demande: ${requestedQty}.`
+      );
+    }
+
+    return {
+      productId: product._id,
+      nextStock: Math.max(product.stock - requestedQty, 0),
+    };
+  });
 
   const orderId = `order-${crypto.randomUUID()}`;
   const orderNumber = crypto.randomUUID();

@@ -5,6 +5,8 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
+export const dynamic = "force-dynamic";
+
 export async function POST(req: NextRequest) {
   const body = await req.text();
   const headersList = await headers();
@@ -214,24 +216,48 @@ async function createOrderInSanity(
 async function updateStockLevels(
   stockUpdates: { productId: string; quantity: number }[]
 ) {
-  for (const { productId, quantity } of stockUpdates) {
-    try {
-      // Fetch current stock
-      const product = await backendClient.getDocument(productId);
+  if (!stockUpdates.length) return;
+
+  const quantityByProductId = new Map<string, number>();
+  for (const update of stockUpdates) {
+    const quantity = Math.max(0, update.quantity || 0);
+    if (!update.productId || quantity <= 0) continue;
+    quantityByProductId.set(
+      update.productId,
+      (quantityByProductId.get(update.productId) || 0) + quantity
+    );
+  }
+
+  const productIds = [...quantityByProductId.keys()];
+  if (!productIds.length) return;
+
+  try {
+    const products = await backendClient.fetch<Array<{ _id: string; stock?: number }>>(
+      `*[_type == "product" && _id in $ids]{_id, stock}`,
+      { ids: productIds }
+    );
+    const productById = new Map(products.map((product) => [product._id, product]));
+    const transaction = backendClient.transaction();
+    let hasPatch = false;
+
+    for (const productId of productIds) {
+      const product = productById.get(productId);
+      const quantity = quantityByProductId.get(productId) || 0;
 
       if (!product || typeof product.stock !== "number") {
-        console.warn(
-          `Product with ID ${productId} not found or stock is invalid.`
-        );
+        console.warn(`Product with ID ${productId} not found or stock is invalid.`);
         continue;
       }
 
-      const newStock = Math.max(product.stock - quantity, 0); // Ensure stock does not go negative
-
-      // Update stock in Sanity
-      await backendClient.patch(productId).set({ stock: newStock }).commit();
-    } catch (error) {
-      console.error(`Failed to update stock for product ${productId}:`, error);
+      const newStock = Math.max(product.stock - quantity, 0);
+      transaction.patch(productId, { set: { stock: newStock } });
+      hasPatch = true;
     }
+
+    if (hasPatch) {
+      await transaction.commit();
+    }
+  } catch (error) {
+    console.error("Failed to batch update stock levels:", error);
   }
 }

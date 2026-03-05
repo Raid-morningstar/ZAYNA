@@ -27,9 +27,35 @@ const BRAND_QUERY = defineQuery(`*[_type == "product" && slug.current == $slug]{
 
 const MY_ORDERS_QUERY =
   defineQuery(`*[_type == 'order' && clerkUserId == $userId] | order(orderDate desc){
-...,products[]{
-  ...,product->
-}
+  _id,
+  _updatedAt,
+  orderNumber,
+  customerName,
+  email,
+  orderDate,
+  status,
+  paymentStatus,
+  paymentMethod,
+  totalPrice,
+  amountDiscount,
+  currency,
+  invoice{
+    number,
+    hosted_invoice_url
+  },
+  address{
+    phone
+  },
+  products[]{
+    _key,
+    quantity,
+    product->{
+      _id,
+      name,
+      price,
+      images
+    }
+  }
 }`);
 const GET_ALL_BLOG = defineQuery(
   `*[_type == 'blog'] | order(publishedAt desc)[0...$quantity]{

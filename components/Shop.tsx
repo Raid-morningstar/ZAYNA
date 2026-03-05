@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import Container from "./Container";
 import Title from "./Title";
 import CategoryList from "./shop/CategoryList";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import BrandList from "./shop/BrandList";
 import PriceList from "./shop/PriceList";
 import { client } from "@/sanity/lib/client";
@@ -18,9 +18,11 @@ interface Props {
   brands: BRANDS_QUERYResult;
 }
 const Shop = ({ categories, brands }: Props) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const brandParams = searchParams?.get("brand");
   const categoryParams = searchParams?.get("category");
+  const searchTerm = searchParams?.get("q")?.trim() || "";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
@@ -31,6 +33,14 @@ const Shop = ({ categories, brands }: Props) => {
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const requestIdRef = useRef(0);
+
+  useEffect(() => {
+    setSelectedCategory(categoryParams || null);
+  }, [categoryParams]);
+
+  useEffect(() => {
+    setSelectedBrand(brandParams || null);
+  }, [brandParams]);
 
   const fetchProducts = useCallback(async () => {
     const requestId = requestIdRef.current + 1;
@@ -45,10 +55,14 @@ const Shop = ({ categories, brands }: Props) => {
         minPrice = min;
         maxPrice = max;
       }
+      const searchPattern = searchTerm
+        ? `*${searchTerm.split(/\s+/).filter(Boolean).join("*")}*`
+        : "";
       const query = `
       *[_type == "product"
         && ($selectedCategory == "" || references(*[_type == "category" && slug.current == $selectedCategory][0]._id))
         && ($selectedBrand == "" || references(*[_type == "brand" && slug.current == $selectedBrand][0]._id))
+        && ($searchPattern == "" || name match $searchPattern || description match $searchPattern)
         && price >= $minPrice
         && price <= $maxPrice
       ] | order(name asc) {
@@ -70,6 +84,7 @@ const Shop = ({ categories, brands }: Props) => {
           client.fetch<Product[]>(query, {
             selectedCategory: selectedCategory ?? "",
             selectedBrand: selectedBrand ?? "",
+            searchPattern,
             minPrice,
             maxPrice,
           }),
@@ -88,7 +103,7 @@ const Shop = ({ categories, brands }: Props) => {
         setLoading(false);
       }
     }
-  }, [selectedCategory, selectedBrand, selectedPrice]);
+  }, [selectedCategory, selectedBrand, selectedPrice, searchTerm]);
 
   useEffect(() => {
     fetchProducts();
@@ -103,12 +118,16 @@ const Shop = ({ categories, brands }: Props) => {
             </Title>
             {(selectedCategory !== null ||
               selectedBrand !== null ||
-              selectedPrice !== null) && (
+              selectedPrice !== null ||
+              !!searchTerm) && (
               <button
                 onClick={() => {
                   setSelectedCategory(null);
                   setSelectedBrand(null);
                   setSelectedPrice(null);
+                  if (searchTerm) {
+                    router.push("/shop");
+                  }
                 }}
                 className="text-shop_dark_green underline text-sm mt-2 font-medium hover:text-darkRed hoverEffect"
               >

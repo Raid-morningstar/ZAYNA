@@ -15,6 +15,46 @@ import { useState } from "react";
 import OrderDetailDialog from "./OrderDetailDialog";
 import toast from "react-hot-toast";
 
+const formatStatusLabel = (value?: string) =>
+  (value || "unknown")
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+
+const getOrderStatusClasses = (value?: string) => {
+  const status = (value || "").toLowerCase();
+  if (status === "paid" || status === "delivered") {
+    return "bg-emerald-100 text-emerald-800 ring-emerald-200";
+  }
+  if (status === "pending" || status === "processing") {
+    return "bg-amber-100 text-amber-800 ring-amber-200";
+  }
+  if (status === "shipped" || status === "out_for_delivery") {
+    return "bg-blue-100 text-blue-800 ring-blue-200";
+  }
+  if (status === "cancelled") {
+    return "bg-rose-100 text-rose-800 ring-rose-200";
+  }
+  return "bg-gray-100 text-gray-700 ring-gray-200";
+};
+
+const getPaymentStatusClasses = (value?: string) => {
+  const status = (value || "").toLowerCase();
+  if (status === "paid") {
+    return "bg-emerald-100 text-emerald-800 ring-emerald-200";
+  }
+  if (status === "partial" || status === "pending") {
+    return "bg-amber-100 text-amber-800 ring-amber-200";
+  }
+  if (status === "failed") {
+    return "bg-rose-100 text-rose-800 ring-rose-200";
+  }
+  if (status === "refunded") {
+    return "bg-violet-100 text-violet-800 ring-violet-200";
+  }
+  return "bg-gray-100 text-gray-700 ring-gray-200";
+};
+
 const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
   const [selectedOrder, setSelectedOrder] = useState<
     MY_ORDERS_QUERYResult[number] | null
@@ -35,7 +75,7 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
             <Tooltip key={order?._id || order?.orderNumber || `order-${index}`}>
               <TooltipTrigger asChild>
                 <TableRow
-                  className="cursor-pointer hover:bg-gray-100 h-12"
+                  className="cursor-pointer h-14 transition-colors hover:bg-shop_light_green/10"
                   onClick={() => setSelectedOrder(order)}
                 >
                   <TableCell className="font-medium">
@@ -58,30 +98,18 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                   <TableCell>
                     {order?.status && (
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          order.status === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${getOrderStatusClasses(order.status)}`}
                       >
-                        {order?.status.charAt(0).toUpperCase() +
-                          order?.status.slice(1)}
+                        {formatStatusLabel(order.status)}
                       </span>
                     )}
                   </TableCell>
                   <TableCell>
                     {paymentStatus && (
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          paymentStatus === "paid"
-                            ? "bg-green-100 text-green-800"
-                            : paymentStatus === "partial"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-yellow-100 text-yellow-800"
-                        }`}
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${getPaymentStatusClasses(paymentStatus)}`}
                       >
-                        {paymentStatus.charAt(0).toUpperCase() +
-                          paymentStatus.slice(1)}
+                        {formatStatusLabel(paymentStatus)}
                       </span>
                     )}
                   </TableCell>
