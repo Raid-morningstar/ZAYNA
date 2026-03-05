@@ -88,7 +88,7 @@ const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
       ?.title || "Cette categorie";
 
   return (
-    <Container className="flex flex-col lg:px-0 my-10">
+    <Container id="categories" className="flex flex-col lg:px-0 my-10 scroll-mt-28">
       <HomeTabbar
         categories={tabCategories.map((category) => ({
           _id: category._id,

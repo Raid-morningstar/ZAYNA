@@ -1,9 +1,15 @@
 import { cn } from '@/lib/utils'
 import React from 'react'
 
-const Container = ({ children, className }: { children: React.ReactNode, className?: string }) => {
+type ContainerProps = React.HTMLAttributes<HTMLDivElement> & {
+  children: React.ReactNode;
+};
+
+const Container = ({ children, className, ...props }: ContainerProps) => {
   return (
-    <div className={cn("max-w-screen-xl mx-auto px-4", className)}>{children}</div>
+    <div className={cn("max-w-screen-xl mx-auto px-4", className)} {...props}>
+      {children}
+    </div>
   )
 }
 
