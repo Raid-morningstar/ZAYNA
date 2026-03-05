@@ -8,7 +8,7 @@ import { getCategories } from "@/sanity/queries";
 import React from "react";
 
 const Home = async () => {
-  const categories = await getCategories(8, 60);
+  const categories = await getCategories(undefined, 0);
 
   return (
     <Container className="bg-shop-light-pink">

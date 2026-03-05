@@ -11,7 +11,7 @@ import { Button } from "./ui/button";
 import { getFooterCategories } from "@/sanity/queries";
 
 const Footer = async () => {
-  const categories = await getFooterCategories(8);
+  const categories = await getFooterCategories(undefined, 0);
 
   return (
     <footer className="border-t border-shop_light_green/20 bg-gradient-to-b from-white to-shop_light_bg/40">

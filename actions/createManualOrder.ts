@@ -30,6 +30,10 @@ export async function createManualOrder(input: CreateManualOrderInput) {
     throw new Error("Unauthorized");
   }
 
+  if (!input.items?.length) {
+    throw new Error("Cart is empty");
+  }
+
   const user = await currentUser();
   const customerEmail =
     user?.primaryEmailAddress?.emailAddress || user?.emailAddresses[0]?.emailAddress;
@@ -72,8 +76,42 @@ export async function createManualOrder(input: CreateManualOrderInput) {
     }
   }
 
+  const stockSnapshots = await Promise.all(
+    input.items.map(async (item) => {
+      const productId = item?.product?._id;
+      if (!productId) {
+        throw new Error("Invalid product in cart");
+      }
+
+      const product = await backendClient.fetch<
+        { _id: string; name?: string; stock?: number } | null
+      >(`*[_type == "product" && _id == $id][0]{_id, name, stock}`, {
+        id: productId,
+      });
+
+      if (!product || typeof product.stock !== "number") {
+        throw new Error(
+          `Product "${item.product?.name || "Unknown"}" is unavailable`
+        );
+      }
+
+      if (product.stock < item.quantity) {
+        throw new Error(
+          `Stock insuffisant pour "${product.name || item.product?.name || "Produit"}". Disponible: ${product.stock}, demande: ${item.quantity}.`
+        );
+      }
+
+      return {
+        productId: product._id,
+        nextStock: Math.max(product.stock - item.quantity, 0),
+      };
+    })
+  );
+
+  const orderId = `order-${crypto.randomUUID()}`;
   const orderNumber = crypto.randomUUID();
-  const order = await backendClient.create({
+  const orderDocument = {
+    _id: orderId,
     _type: "order",
     orderNumber,
     customerName: user?.fullName || "Customer",
@@ -117,17 +155,22 @@ export async function createManualOrder(input: CreateManualOrderInput) {
           },
         }
       : {}),
-  });
+  };
 
-  if (promoCalculation.valid && promoCalculation.promoId) {
-    await backendClient
-      .patch(promoCalculation.promoId)
-      .inc({usedCount: 1})
-      .commit({autoGenerateArrayKeys: false});
+  const transaction = backendClient.transaction();
+  for (const snapshot of stockSnapshots) {
+    transaction.patch(snapshot.productId, {
+      set: {stock: snapshot.nextStock},
+    });
   }
+  transaction.create(orderDocument);
+  if (promoCalculation.valid && promoCalculation.promoId) {
+    transaction.patch(promoCalculation.promoId, {inc: {usedCount: 1}});
+  }
+  await transaction.commit({autoGenerateArrayKeys: false});
 
   return {
-    orderId: order._id,
+    orderId,
     orderNumber,
   };
 }

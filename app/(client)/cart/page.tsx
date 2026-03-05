@@ -286,7 +286,7 @@ const CartPage = () => {
       ) {
         toast.error("Le paiement par carte n'est pas encore configure. Verifiez les variables Stripe.");
       } else {
-        toast.error("Echec du paiement. Veuillez reessayer.");
+        toast.error(message || "Echec du paiement. Veuillez reessayer.");
       }
     } finally {
       setLoading(false);

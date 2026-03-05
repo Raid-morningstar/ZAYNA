@@ -161,7 +161,13 @@ export default function StudioProductsBoard() {
   }
 
   return (
-    <div style={getShellStyle(palette)}>
+    <div
+      style={{
+        ...getShellStyle(palette),
+        minHeight: 'calc(100vh - 96px)',
+        padding: 26,
+      }}
+    >
       <style>{STUDIO_BOARD_CSS}</style>
       <Stack space={4}>
         <Flex align="center" justify="space-between">
@@ -252,7 +258,7 @@ export default function StudioProductsBoard() {
             </Grid>
 
             <Card
-              padding={4}
+              padding={5}
               radius={2}
               style={{
                 background: palette.card,
@@ -277,7 +283,7 @@ export default function StudioProductsBoard() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       style={{
-                        minWidth: 220,
+                        minWidth: 260,
                         borderRadius: 8,
                         border: `1px solid ${palette.border}`,
                         background: palette.card,
@@ -335,7 +341,7 @@ export default function StudioProductsBoard() {
 
                 {filteredProducts.length ? (
                   <div className="zayna-scroll" style={{overflowX: 'auto'}}>
-                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 980}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 1280}}>
                       <thead>
                         <tr>
                           {[
@@ -354,7 +360,9 @@ export default function StudioProductsBoard() {
                                 fontSize: 12,
                                 color: palette.muted,
                                 borderBottom: `1px solid ${palette.border}`,
-                                paddingBottom: 10,
+                                padding: '0 12px 10px 0',
+                                ...(label === 'Price' ? {paddingRight: 30} : {}),
+                                ...(label === 'Stock' ? {paddingLeft: 20} : {}),
                               }}
                             >
                               {label}
@@ -374,7 +382,7 @@ export default function StudioProductsBoard() {
                             <tr key={product._id}>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 0',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                 }}
@@ -396,7 +404,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 0',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                   color: palette.muted,
@@ -406,7 +414,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 0',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                   color: palette.muted,
@@ -416,7 +424,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 30px 14px 0',
                                   textAlign: 'right',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
@@ -435,7 +443,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 20px',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                 }}
@@ -446,7 +454,7 @@ export default function StudioProductsBoard() {
                                   </Text>
                                   <div
                                     style={{
-                                      width: 120,
+                                      width: 150,
                                       height: 6,
                                       borderRadius: 999,
                                       background: palette.track,
@@ -470,7 +478,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 0',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                   color: palette.muted,
@@ -480,7 +488,7 @@ export default function StudioProductsBoard() {
                               </td>
                               <td
                                 style={{
-                                  padding: '11px 0',
+                                  padding: '14px 12px 14px 0',
                                   borderBottom: `1px solid ${palette.border}`,
                                   fontSize: 12,
                                   color: palette.muted,

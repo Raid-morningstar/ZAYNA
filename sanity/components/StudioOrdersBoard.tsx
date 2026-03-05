@@ -31,6 +31,14 @@ type OrderLite = {
   paymentMethod?: string
   totalPrice?: number
   itemsCount?: number
+  products?: OrderProductLine[]
+}
+
+type OrderProductLine = {
+  quantity?: number
+  productId?: string
+  productName?: string
+  productStock?: number
 }
 
 const ORDERS_QUERY = `*[_type == "order"] | order(orderDate desc){
@@ -43,7 +51,13 @@ const ORDERS_QUERY = `*[_type == "order"] | order(orderDate desc){
   paymentStatus,
   paymentMethod,
   totalPrice,
-  "itemsCount": count(coalesce(products, []))
+  "itemsCount": count(coalesce(products, [])),
+  "products": coalesce(products, [])[]{
+    quantity,
+    "productId": product->_id,
+    "productName": product->name,
+    "productStock": product->stock
+  }
 }`
 
 const ORDER_FILTERS = [
@@ -79,6 +93,12 @@ function dedupeOrders(orders: OrderLite[]) {
     if (newDate >= oldDate) byKey.set(key, order)
   }
   return [...byKey.values()]
+}
+
+function getOrderUnits(order: OrderLite) {
+  const lines = order.products || []
+  if (!lines.length) return order.itemsCount ?? 0
+  return lines.reduce((sum, line) => sum + Math.max(1, line.quantity ?? 1), 0)
 }
 
 export default function StudioOrdersBoard() {
@@ -158,6 +178,7 @@ export default function StudioOrdersBoard() {
   const metrics = useMemo(() => {
     const paidOrders = orders.filter(isPaid)
     const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.totalPrice ?? 0), 0)
+    const totalUnitsOrdered = orders.reduce((sum, order) => sum + getOrderUnits(order), 0)
     const pendingOrders = orders.filter((order) => (order.status || '').toLowerCase() === 'pending').length
     const deliveredOrders = orders.filter((order) => (order.status || '').toLowerCase() === 'delivered').length
     const failedPayments = orders.filter((order) => (order.paymentStatus || '').toLowerCase() === 'failed').length
@@ -165,6 +186,7 @@ export default function StudioOrdersBoard() {
 
     return {
       totalOrders: orders.length,
+      totalUnitsOrdered,
       totalRevenue,
       pendingOrders,
       deliveredOrders,
@@ -180,7 +202,13 @@ export default function StudioOrdersBoard() {
   }
 
   return (
-    <div style={getShellStyle(palette)}>
+    <div
+      style={{
+        ...getShellStyle(palette),
+        minHeight: 'calc(100vh - 96px)',
+        padding: 26,
+      }}
+    >
       <style>{STUDIO_BOARD_CSS}</style>
       <Stack space={4}>
         <Flex align="center" justify="space-between">
@@ -253,7 +281,7 @@ export default function StudioOrdersBoard() {
               <StatCard
                 title="Total Orders"
                 value={formatCompact(metrics.totalOrders)}
-                subtitle={`${formatCompact(metrics.deliveredOrders)} delivered`}
+                subtitle={`${formatCompact(metrics.totalUnitsOrdered)} units ordered`}
                 palette={palette}
               />
               <StatCard
@@ -271,7 +299,7 @@ export default function StudioOrdersBoard() {
             </Grid>
 
             <Card
-              padding={4}
+              padding={5}
               radius={2}
               style={{
                 background: palette.card,
@@ -296,7 +324,7 @@ export default function StudioOrdersBoard() {
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
                       style={{
-                        minWidth: 220,
+                        minWidth: 260,
                         borderRadius: 8,
                         border: `1px solid ${palette.border}`,
                         background: palette.card,
@@ -354,7 +382,7 @@ export default function StudioOrdersBoard() {
 
                 {filteredOrders.length ? (
                   <div className="zayna-scroll" style={{overflowX: 'auto'}}>
-                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 900}}>
+                    <table style={{width: '100%', borderCollapse: 'collapse', minWidth: 1260}}>
                       <thead>
                         <tr>
                           {[
@@ -362,6 +390,8 @@ export default function StudioOrdersBoard() {
                             'Customer',
                             'Date',
                             'Items',
+                            'Qty',
+                            'Products / Stock',
                             'Total',
                             'Payment Method',
                             'Delivery',
@@ -371,7 +401,7 @@ export default function StudioOrdersBoard() {
                               key={label}
                               style={{
                                 textAlign:
-                                  label === 'Items' || label === 'Total' ? 'right' : 'left',
+                                  ['Items', 'Qty', 'Total'].includes(label) ? 'right' : 'left',
                                 fontSize: 12,
                                 color: palette.muted,
                                 borderBottom: `1px solid ${palette.border}`,
@@ -388,7 +418,7 @@ export default function StudioOrdersBoard() {
                           <tr key={order._id || `${order.orderNumber || 'order'}-${index}`}>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                               }}
@@ -397,7 +427,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                               }}
@@ -413,7 +443,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -423,7 +453,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -433,7 +463,66 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
+                                textAlign: 'right',
+                                borderBottom: `1px solid ${palette.border}`,
+                                fontSize: 12,
+                                fontWeight: 600,
+                              }}
+                            >
+                              {getOrderUnits(order)}
+                            </td>
+                            <td
+                              style={{
+                                padding: '14px 0',
+                                borderBottom: `1px solid ${palette.border}`,
+                                fontSize: 12,
+                                minWidth: 280,
+                              }}
+                            >
+                              {order.products?.length ? (
+                                <Stack space={2}>
+                                  {order.products.slice(0, 2).map((line, lineIndex) => {
+                                    const lineStock = line.productStock
+                                    const stockColor =
+                                      typeof lineStock !== 'number'
+                                        ? palette.muted
+                                        : lineStock <= 0
+                                          ? palette.danger
+                                          : lineStock <= 5
+                                            ? palette.warning
+                                            : palette.success
+
+                                    return (
+                                      <Text
+                                        key={`${line.productId || line.productName || 'line'}-${lineIndex}`}
+                                        size={1}
+                                        style={{color: palette.text}}
+                                      >
+                                        {`${Math.max(1, line.quantity ?? 1)}x ${line.productName || 'Unknown product'} `}
+                                        <span style={{color: stockColor}}>
+                                          {typeof lineStock === 'number'
+                                            ? `(stock ${lineStock})`
+                                            : '(stock --)'}
+                                        </span>
+                                      </Text>
+                                    )
+                                  })}
+                                  {order.products.length > 2 ? (
+                                    <Text size={1} style={{color: palette.muted}}>
+                                      +{order.products.length - 2} more line(s)
+                                    </Text>
+                                  ) : null}
+                                </Stack>
+                              ) : (
+                                <Text size={1} style={{color: palette.muted}}>
+                                  -
+                                </Text>
+                              )}
+                            </td>
+                            <td
+                              style={{
+                                padding: '14px 0',
                                 textAlign: 'right',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
@@ -444,7 +533,7 @@ export default function StudioOrdersBoard() {
                             </td>
                             <td
                               style={{
-                                padding: '11px 0',
+                                padding: '14px 0',
                                 borderBottom: `1px solid ${palette.border}`,
                                 fontSize: 12,
                                 color: palette.muted,
@@ -452,12 +541,12 @@ export default function StudioOrdersBoard() {
                             >
                               {toStatusLabel(order.paymentMethod || '-')}
                             </td>
-                            <td style={{padding: '11px 0', borderBottom: `1px solid ${palette.border}`}}>
+                            <td style={{padding: '14px 0', borderBottom: `1px solid ${palette.border}`}}>
                               <span style={getBadgeStyle(order.status, theme, 'order')}>
                                 {toStatusLabel(order.status)}
                               </span>
                             </td>
-                            <td style={{padding: '11px 0', borderBottom: `1px solid ${palette.border}`}}>
+                            <td style={{padding: '14px 0', borderBottom: `1px solid ${palette.border}`}}>
                               <span style={getBadgeStyle(order.paymentStatus, theme, 'payment')}>
                                 {toStatusLabel(order.paymentStatus)}
                               </span>

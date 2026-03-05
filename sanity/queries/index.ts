@@ -154,17 +154,23 @@ const getMyOrders = async (userId: string) => {
   }
 };
 
-const getFooterCategories = async (quantity = 8) => {
+const getFooterCategories = async (quantity?: number, revalidate = 60) => {
   try {
-    const query = `*[_type == "category" && defined(slug.current)] | order(title asc) [0...$quantity]{
+    const query = quantity
+      ? `*[_type == "category" && defined(slug.current)] | order(title asc) [0...$quantity]{
+      _id,
+      title,
+      slug
+    }`
+      : `*[_type == "category" && defined(slug.current)] | order(title asc){
       _id,
       title,
       slug
     }`;
     const { data } = await sanityFetch<Array<Pick<Category, "_id" | "title" | "slug">>>({
       query,
-      params: { quantity },
-      revalidate: 60,
+      params: quantity ? { quantity } : {},
+      revalidate,
     });
     return data ?? [];
   } catch (error) {
