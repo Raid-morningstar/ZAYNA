@@ -7,7 +7,6 @@ import CategoryList from "./shop/CategoryList";
 import { useRouter, useSearchParams } from "next/navigation";
 import BrandList from "./shop/BrandList";
 import PriceList from "./shop/PriceList";
-import { client } from "@/sanity/lib/client";
 import { Loader2 } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
@@ -48,45 +47,41 @@ const Shop = ({ categories, brands }: Props) => {
 
     setLoading(true);
     try {
-      let minPrice = 0;
-      let maxPrice = 10000;
+      let minPrice: number | null = null;
+      let maxPrice: number | null = null;
       if (selectedPrice) {
         const [min, max] = selectedPrice.split("-").map(Number);
-        minPrice = min;
-        maxPrice = max;
+        minPrice = Number.isFinite(min) ? min : null;
+        maxPrice = Number.isFinite(max) ? max : null;
       }
-      const searchPattern = searchTerm
-        ? `*${searchTerm.split(/\s+/).filter(Boolean).join("*")}*`
-        : "";
-      const query = `
-      *[_type == "product"
-        && ($selectedCategory == "" || references(*[_type == "category" && slug.current == $selectedCategory][0]._id))
-        && ($selectedBrand == "" || references(*[_type == "brand" && slug.current == $selectedBrand][0]._id))
-        && ($searchPattern == "" || name match $searchPattern || description match $searchPattern)
-        && price >= $minPrice
-        && price <= $maxPrice
-      ] | order(name asc) {
-        _id,
-        name,
-        slug,
-        images,
-        description,
-        price,
-        discount,
-        stock,
-        status,
-        "categories": categories[]->title
+
+      const params = new URLSearchParams();
+      if (selectedCategory) {
+        params.set("category", selectedCategory);
       }
-    `;
+      if (selectedBrand) {
+        params.set("brand", selectedBrand);
+      }
+      if (searchTerm) {
+        params.set("q", searchTerm);
+      }
+      if (minPrice !== null && maxPrice !== null) {
+        params.set("minPrice", String(minPrice));
+        params.set("maxPrice", String(maxPrice));
+      }
+
       const data = await fetchWithRetry(
-        () =>
-          client.fetch<Product[]>(query, {
-            selectedCategory: selectedCategory ?? "",
-            selectedBrand: selectedBrand ?? "",
-            searchPattern,
-            minPrice,
-            maxPrice,
-          }),
+        async () => {
+          const res = await fetch(`/api/products/search?${params.toString()}`, {
+            cache: "no-store",
+          });
+
+          if (!res.ok) {
+            throw new Error(`Failed to fetch products: ${res.status}`);
+          }
+
+          return (await res.json()) as Product[];
+        },
         { retries: 1, retryDelayMs: 400 }
       );
       if (requestIdRef.current === requestId) {
