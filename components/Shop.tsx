@@ -75,7 +75,6 @@ const Shop = ({ categories, brands }: Props) => {
         discount,
         stock,
         status,
-        variant,
         "categories": categories[]->title
       }
     `;

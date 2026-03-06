@@ -150,10 +150,34 @@ const DASHBOARD_CSS = `
 }
 .zayna-status-card {
   transition: transform .22s ease, filter .22s ease;
+  height: 100%;
 }
 .zayna-status-card:hover {
   transform: translateY(-2px);
   filter: brightness(1.03);
+}
+.zayna-status-card-body {
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.zayna-status-label {
+  min-height: 2.6em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  line-height: 1.3;
+}
+.zayna-status-value {
+  font-size: 26px;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: .01em;
 }
 `
 
@@ -586,9 +610,9 @@ export default function StudioDashboard() {
       key: 'shipped',
       label: 'Shipped',
       value: metrics.statusCounts.shipped,
-      valueColor: '#7e96ff',
-      bg: theme === 'dark' ? 'rgba(120,138,255,.12)' : 'rgba(80,108,243,.14)',
-      border: theme === 'dark' ? 'rgba(120,138,255,.3)' : 'rgba(80,108,243,.24)',
+      valueColor: theme === 'dark' ? '#7cf3cc' : '#0d6e4f',
+      bg: theme === 'dark' ? 'rgba(124,243,204,.11)' : 'rgba(13,110,79,.1)',
+      border: theme === 'dark' ? 'rgba(124,243,204,.28)' : 'rgba(13,110,79,.22)',
     },
     {
       key: 'delivered',
@@ -977,7 +1001,7 @@ export default function StudioDashboard() {
                       </Text>
                     )}
                   </Stack>
-                  <Grid columns={[2, 3]} gap={2}>
+                  <Grid columns={[2, 3]} gap={2} style={{alignItems: 'stretch'}}>
                     {statusOverviewCards.map((item) => (
                       <div key={item.key} className="zayna-status-card">
                         <Card
@@ -987,24 +1011,26 @@ export default function StudioDashboard() {
                             background: item.bg,
                             border: `1px solid ${item.border}`,
                             boxShadow: palette.shadow,
+                            height: '100%',
                           }}
                         >
-                          <Stack space={2} style={{textAlign: 'center'}}>
-                            <Text
-                              size={1}
-                              style={{
-                                color: palette.muted,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.08em',
-                                fontWeight: 600,
-                              }}
-                            >
-                              {item.label}
-                            </Text>
-                            <Heading size={2} style={{color: item.valueColor, lineHeight: 1}}>
-                              {item.value}
-                            </Heading>
-                          </Stack>
+                          <div className="zayna-status-card-body">
+                            <Stack space={2} style={{textAlign: 'center', width: '100%'}}>
+                              <Text
+                                size={1}
+                                className="zayna-status-label"
+                                style={{color: palette.muted}}
+                              >
+                                {item.label}
+                              </Text>
+                              <Text
+                                className="zayna-status-value"
+                                style={{color: item.valueColor}}
+                              >
+                                {item.value}
+                              </Text>
+                            </Stack>
+                          </div>
                         </Card>
                       </div>
                     ))}

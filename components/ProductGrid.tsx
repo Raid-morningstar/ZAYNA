@@ -53,7 +53,6 @@ const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
   discount,
   stock,
   status,
-  variant,
   "categories": categories[]->title
 }`;
         const params = { categoryId: selectedCategoryId };

@@ -1,6 +1,7 @@
 "use client";
 import { Product } from "@/sanity.types";
 import useStore from "@/store";
+import { cn } from "@/lib/utils";
 import { Heart } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -9,9 +10,13 @@ import toast from "react-hot-toast";
 const FavoriteButton = ({
   showProduct = false,
   product,
+  className,
+  iconClassName,
 }: {
   showProduct?: boolean;
   product?: Product | null | undefined;
+  className?: string;
+  iconClassName?: string;
 }) => {
   const { favoriteProduct, addToFavorite } = useStore();
   const existingProduct = favoriteProduct.find(
@@ -33,9 +38,15 @@ const FavoriteButton = ({
   return (
     <>
       {!showProduct ? (
-        <Link href={"/wishlist"} className="group relative">
-          <Heart className="w-5 h-5 hover:text-shop_light_green hoverEffect" />
-          <span className="absolute -top-1 -right-1 bg-shop_dark_green text-white h-3.5 w-3.5 rounded-full text-xs font-semibold flex items-center justify-center">
+        <Link
+          href={"/wishlist"}
+          className={cn(
+            "group relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-shop_light_green/30 bg-white/90 text-lightColor shadow-[0_10px_24px_-20px_rgba(22,46,110,0.9)] transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-shop_light_green/70 hover:text-shop_dark_green",
+            className
+          )}
+        >
+          <Heart className={cn("h-4.5 w-4.5", iconClassName)} />
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-shop_dark_green px-1 text-[10px] font-semibold text-white">
             {favoriteProduct.length ? favoriteProduct.length : 0}
           </span>
         </Link>

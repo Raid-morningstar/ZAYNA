@@ -1,6 +1,7 @@
 "use client";
 
 import { client } from "@/sanity/lib/client";
+import { cn } from "@/lib/utils";
 import { fetchWithRetry } from "@/sanity/lib/fetchWithRetry";
 import { ArrowRight, Loader2, Search, X } from "lucide-react";
 import Image from "next/image";
@@ -23,7 +24,17 @@ const moneyFormatter = new Intl.NumberFormat("fr-MA", {
   maximumFractionDigits: 0,
 });
 
-const SearchBar = () => {
+interface SearchBarProps {
+  mode?: "all" | "desktop" | "mobile";
+  onDesktopActiveChange?: (isActive: boolean) => void;
+  className?: string;
+}
+
+const SearchBar = ({
+  mode = "all",
+  onDesktopActiveChange,
+  className,
+}: SearchBarProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -39,6 +50,8 @@ const SearchBar = () => {
   const [isDesktopFocused, setIsDesktopFocused] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
+  const showDesktopSearch = mode !== "mobile";
+  const showMobileSearch = mode !== "desktop";
 
   useEffect(() => {
     if (!isDesktopOpen) return;
@@ -123,6 +136,18 @@ const SearchBar = () => {
   const showDesktopDropdown =
     isDesktopOpen && isDesktopFocused && hasSearchQuery;
   const showMobileDropdown = isMobileOpen && hasSearchQuery;
+
+  useEffect(() => {
+    if (!onDesktopActiveChange) return;
+
+    onDesktopActiveChange(isDesktopOpen || isDesktopFocused);
+  }, [isDesktopFocused, isDesktopOpen, onDesktopActiveChange]);
+
+  useEffect(() => {
+    return () => {
+      onDesktopActiveChange?.(false);
+    };
+  }, [onDesktopActiveChange]);
 
   const getDisplayPrice = (product: SearchSuggestion) => {
     const basePrice = product.price ?? 0;
@@ -248,7 +273,7 @@ const SearchBar = () => {
                       ? moneyFormatter.format(getDisplayPrice(product))
                       : "Prix indisponible"}
                     {typeof product.stock === "number"
-                      ? ` · Stock ${Math.max(product.stock, 0)}`
+                      ? ` | Stock ${Math.max(product.stock, 0)}`
                       : ""}
                   </p>
                 </div>
@@ -283,88 +308,95 @@ const SearchBar = () => {
 
   return (
     <>
-      <div ref={desktopWrapperRef} className="relative hidden md:block">
-        <form
-          onSubmit={onDesktopSubmit}
-          className={`group relative flex h-10 items-center overflow-hidden rounded-full border bg-white/85 backdrop-blur-md transition-[width,box-shadow,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-            isDesktopOpen
-              ? "w-64 xl:w-80 border-shop_dark_green/35 shadow-[0_14px_36px_-24px_rgba(31,60,136,0.85)]"
-              : "w-10 border-shop_light_green/45 shadow-[0_10px_24px_-24px_rgba(31,60,136,0.8)] hover:border-shop_light_green/80 hover:shadow-[0_12px_28px_-20px_rgba(77,182,198,0.8)]"
-          }`}
+      {showDesktopSearch ? (
+        <div
+          ref={desktopWrapperRef}
+          className={cn("relative hidden md:block", className)}
         >
-          <button
-            type="button"
-            onClick={() => {
-              if (!isDesktopOpen) {
-                openDesktopSearch();
-                return;
-              }
-              if (trimmedQuery) {
-                goToSearch();
-              }
-            }}
-            className="inline-flex h-10 w-10 items-center justify-center text-lightColor hover:text-shop_dark_green hoverEffect"
-            aria-label="Rechercher"
-          >
-            <Search className="h-4.5 w-4.5 group-hover:scale-105 transition-transform duration-300" />
-          </button>
-          <input
-            ref={desktopInputRef}
-            value={query}
-            onFocus={() => setIsDesktopFocused(true)}
-            onChange={(event) => handleQueryChange(event.target.value)}
-            onBlur={closeDesktopWhenEmpty}
-            onKeyDown={(event) => {
-              if (event.key === "Escape") {
-                setIsDesktopFocused(false);
-                setIsDesktopOpen(false);
-              }
-            }}
-            placeholder="Rechercher un produit..."
-            className={`h-full bg-transparent text-sm text-darkColor placeholder:text-lightColor/80 outline-none transition-[width,opacity,padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-              isDesktopOpen ? "w-full pr-20 opacity-100" : "w-0 pr-0 opacity-0"
+          <form
+            onSubmit={onDesktopSubmit}
+            className={`group relative flex h-10 items-center overflow-hidden rounded-full border bg-white/85 backdrop-blur-md transition-[width,box-shadow,border-color,background-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+              isDesktopOpen
+                ? "w-64 xl:w-80 border-shop_dark_green/35 shadow-[0_14px_36px_-24px_rgba(31,60,136,0.85)]"
+                : "w-10 border-shop_light_green/45 shadow-[0_10px_24px_-24px_rgba(31,60,136,0.8)] hover:border-shop_light_green/80 hover:shadow-[0_12px_28px_-20px_rgba(77,182,198,0.8)]"
             }`}
-          />
-          {isDesktopOpen ? (
-            <button
-              type="submit"
-              className={`absolute right-2 inline-flex h-7 w-7 items-center justify-center rounded-full border transition-all duration-300 ${
-                trimmedQuery
-                  ? "border-shop_dark_green/30 bg-shop_dark_green text-white hover:bg-shop_btn_dark_green hover:translate-x-0.5"
-                  : "border-shop_light_green/35 bg-white text-lightColor"
-              }`}
-              aria-label="Lancer la recherche"
-            >
-              <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          ) : null}
-          {isDesktopOpen && query ? (
+          >
             <button
               type="button"
               onClick={() => {
-                clearSearch();
-                desktopInputRef.current?.focus();
+                if (!isDesktopOpen) {
+                  openDesktopSearch();
+                  return;
+                }
+                if (trimmedQuery) {
+                  goToSearch();
+                }
               }}
-              className="absolute right-10 inline-flex h-6 w-6 items-center justify-center rounded-full text-lightColor hover:bg-shop_light_green/20 hover:text-shop_dark_green hoverEffect"
-              aria-label="Effacer la recherche"
+              className="inline-flex h-10 w-10 items-center justify-center text-lightColor hover:text-shop_dark_green hoverEffect"
+              aria-label="Rechercher"
             >
-              <X className="h-3.5 w-3.5" />
+              <Search className="h-4.5 w-4.5 group-hover:scale-105 transition-transform duration-300" />
             </button>
-          ) : null}
-        </form>
-        {renderSuggestions("desktop")}
-      </div>
+            <input
+              ref={desktopInputRef}
+              value={query}
+              onFocus={() => setIsDesktopFocused(true)}
+              onChange={(event) => handleQueryChange(event.target.value)}
+              onBlur={closeDesktopWhenEmpty}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  setIsDesktopFocused(false);
+                  setIsDesktopOpen(false);
+                }
+              }}
+              placeholder="Rechercher un produit..."
+              className={`h-full bg-transparent text-sm text-darkColor placeholder:text-lightColor/80 outline-none transition-[width,opacity,padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                isDesktopOpen ? "w-full pr-20 opacity-100" : "w-0 pr-0 opacity-0"
+              }`}
+            />
+            {isDesktopOpen ? (
+              <button
+                type="submit"
+                className={`absolute right-2 inline-flex h-7 w-7 items-center justify-center rounded-full border transition-all duration-300 ${
+                  trimmedQuery
+                    ? "border-shop_dark_green/30 bg-shop_dark_green text-white hover:bg-shop_btn_dark_green hover:translate-x-0.5"
+                    : "border-shop_light_green/35 bg-white text-lightColor"
+                }`}
+                aria-label="Lancer la recherche"
+              >
+                <ArrowRight className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+            {isDesktopOpen && query ? (
+              <button
+                type="button"
+                onClick={() => {
+                  clearSearch();
+                  desktopInputRef.current?.focus();
+                }}
+                className="absolute right-10 inline-flex h-6 w-6 items-center justify-center rounded-full text-lightColor hover:bg-shop_light_green/20 hover:text-shop_dark_green hoverEffect"
+                aria-label="Effacer la recherche"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </form>
+          {renderSuggestions("desktop")}
+        </div>
+      ) : null}
 
-      <button
-        type="button"
-        onClick={() => setIsMobileOpen(true)}
-        className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-shop_light_green/45 bg-white/90 text-lightColor shadow-[0_10px_26px_-22px_rgba(31,60,136,0.8)] hover:border-shop_light_green hover:text-shop_dark_green hover:shadow-[0_12px_28px_-20px_rgba(77,182,198,0.85)] hoverEffect"
-        aria-label="Ouvrir la recherche"
-      >
-        <Search className="h-4.5 w-4.5" />
-      </button>
+      {showMobileSearch ? (
+        <button
+          type="button"
+          onClick={() => setIsMobileOpen(true)}
+          className="md:hidden inline-flex h-9 w-9 items-center justify-center rounded-full border border-shop_light_green/45 bg-white/90 text-lightColor shadow-[0_10px_26px_-22px_rgba(31,60,136,0.8)] hover:border-shop_light_green hover:text-shop_dark_green hover:shadow-[0_12px_28px_-20px_rgba(77,182,198,0.85)] hoverEffect"
+          aria-label="Ouvrir la recherche"
+        >
+          <Search className="h-4.5 w-4.5" />
+        </button>
+      ) : null}
 
-      {isMobileOpen ? (
+      {showMobileSearch && isMobileOpen ? (
         <>
           <button
             type="button"

@@ -33,12 +33,6 @@ const ProductCharacteristics = async ({
             <span className="font-semibold tracking-wide">2025</span>
           </p>
           <p className="flex items-center justify-between">
-            Type:{" "}
-            <span className="font-semibold tracking-wide">
-              {product?.variant}
-            </span>
-          </p>
-          <p className="flex items-center justify-between">
             Stock:{" "}
             <span className="font-semibold tracking-wide">
               {product?.stock ? "Disponible" : "Rupture de stock"}

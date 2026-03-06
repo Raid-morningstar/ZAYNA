@@ -293,7 +293,7 @@ const CartPage = () => {
     }
   };
   return (
-    <div className="bg-gray-50 pb-52 md:pb-10">
+    <div className="bg-gray-50 pb-10">
       {isSignedIn ? (
         <Container>
           {groupedItems?.length ? (
@@ -334,12 +334,6 @@ const CartPage = () => {
                                 <h2 className="text-base font-semibold line-clamp-1">
                                   {product?.name}
                                 </h2>
-                                <p className="text-sm capitalize">
-                                  Variante :{" "}
-                                  <span className="font-semibold">
-                                    {product?.variant}
-                                  </span>
-                                </p>
                                 <p className="text-sm capitalize">
                                   Statut :{" "}
                                   <span className="font-semibold">
@@ -696,9 +690,9 @@ const CartPage = () => {
                   </div>
                 </div>
                 {/* Order summary for mobile view */}
-                <div className="md:hidden fixed bottom-0 left-0 w-full bg-white pt-2">
-                  <div className="bg-white p-4 rounded-lg border mx-4">
-                    <h2>Resume de commande</h2>
+                <div className="md:hidden mt-5">
+                  <div className="bg-white p-4 rounded-lg border">
+                    <h2 className="text-lg font-semibold mb-4">Resume de commande</h2>
                     <div className="space-y-4">
                       {loyalty && (
                         <div className="rounded-md border p-3 bg-gray-50">
@@ -708,6 +702,112 @@ const CartPage = () => {
                           </p>
                         </div>
                       )}
+
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium">Code promo</span>
+                        <div className="flex gap-2">
+                          <input
+                            value={promoCode}
+                            onChange={(event) => setPromoCode(event.target.value)}
+                            placeholder="Saisir le code promo"
+                            className="flex-1 border rounded-md px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-shop_dark_green/40"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={applyPromoCode}
+                            disabled={loading}
+                          >
+                            Appliquer
+                          </Button>
+                        </div>
+                        {promoState && (
+                          <p
+                            className={`text-xs ${promoState.valid ? "text-green-600" : "text-red-600"}`}
+                          >
+                            {promoState.valid
+                              ? `Applique - remise ${promoState.discountAmount.toFixed(2)} MAD`
+                              : promoState.message || "Promo non valide"}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="text-sm font-medium">Methode de paiement</span>
+                        <RadioGroup
+                          value={paymentMethod}
+                          onValueChange={(value) =>
+                            setPaymentMethod(value as PaymentMethod)
+                          }
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="cod" id="mobile-pay-cod" />
+                            <Label
+                              htmlFor="mobile-pay-cod"
+                              className="flex items-center gap-2"
+                            >
+                              <HandCoins size={16} />
+                              Paiement a la livraison
+                            </Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="cmi_card" id="mobile-pay-cmi" />
+                            <Label
+                              htmlFor="mobile-pay-cmi"
+                              className="flex items-center gap-2"
+                            >
+                              <CreditCard size={16} />
+                              Paiement par carte (Stripe)
+                            </Label>
+                          </div>
+                          {canUseInstallments && (
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem
+                                value="installments"
+                                id="mobile-pay-installments"
+                              />
+                              <Label
+                                htmlFor="mobile-pay-installments"
+                                className="flex items-center gap-2"
+                              >
+                                <Landmark size={16} />
+                                Paiement echelonne
+                              </Label>
+                            </div>
+                          )}
+                        </RadioGroup>
+                        {!canUseInstallments && (
+                          <p className="text-xs text-gray-500">
+                            Le paiement echelonne est reserve aux utilisateurs eligibles.
+                          </p>
+                        )}
+                        {paymentMethod === "installments" && (
+                          <div className="pt-1">
+                            <Label className="text-xs">Plan d&apos;echelonnement</Label>
+                            <select
+                              value={installmentMonths}
+                              onChange={(event) =>
+                                setInstallmentMonths(Number(event.target.value))
+                              }
+                              className="mt-1 w-full border rounded-md px-3 py-2 text-sm"
+                            >
+                              <option value={3}>3 mois</option>
+                              <option value={6}>6 mois</option>
+                              <option value={12}>12 mois</option>
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Mensualite estimee :{" "}
+                              {(finalTotal / Math.max(installmentMonths, 1)).toFixed(2)} MAD
+                            </p>
+                          </div>
+                        )}
+                        {paymentMethod === "cmi_card" && (
+                          <p className="text-xs text-gray-500">
+                            Vous serez redirige vers Stripe pour saisir vos informations de carte en toute securite.
+                          </p>
+                        )}
+                      </div>
+
                       <div className="flex items-center justify-between">
                         <span>Sous-total</span>
                         <PriceFormatter amount={subtotal} />
@@ -730,7 +830,13 @@ const CartPage = () => {
                         disabled={loading}
                         onClick={handleCheckout}
                       >
-                        {loading ? "Veuillez patienter..." : "Passer au paiement"}
+                        {loading
+                          ? "Veuillez patienter..."
+                          : paymentMethod === "cod"
+                            ? "Valider la commande (livraison)"
+                            : paymentMethod === "installments"
+                              ? "Creer la commande echelonnee"
+                              : "Passer au paiement"}
                       </Button>
                     </div>
                   </div>

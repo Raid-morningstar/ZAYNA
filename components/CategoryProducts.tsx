@@ -49,7 +49,6 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           discount,
           stock,
           status,
-          variant,
           "categories": categories[]->title
         }
       `;

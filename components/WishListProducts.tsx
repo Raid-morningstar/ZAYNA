@@ -42,7 +42,6 @@ const WishListProducts = () => {
                   <th className="p-2 text-left hidden md:table-cell">
                     Categorie
                   </th>
-                  <th className="p-2 text-left hidden md:table-cell">Type</th>
                   <th className="p-2 text-left hidden md:table-cell">Statut</th>
                   <th className="p-2 text-left">Prix</th>
                   <th className="p-2 text-center md:text-left">Action</th>
@@ -86,18 +85,17 @@ const WishListProducts = () => {
                         )}
                       </td>
                       <td className="p-2 capitalize hidden md:table-cell">
-                        {product?.variant}
-                      </td>
-                      <td
-                        className={`p-2 w-24 ${
-                          (product?.stock as number) > 0
-                            ? "text-green-600"
-                            : "text-red-600"
-                        } font-medium text-sm hidden md:table-cell`}
-                      >
-                        {(product?.stock as number) > 0
-                          ? "En stock"
-                          : "Rupture de stock"}
+                        <span
+                          className={`${
+                            (product?.stock as number) > 0
+                              ? "text-green-600"
+                              : "text-red-600"
+                          } font-medium text-sm`}
+                        >
+                          {(product?.stock as number) > 0
+                            ? "En stock"
+                            : "Rupture de stock"}
+                        </span>
                       </td>
                       <td className="p-2">
                         <PriceFormatter amount={product?.price} />
