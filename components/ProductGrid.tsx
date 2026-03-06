@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import { motion, AnimatePresence } from "motion/react";
-import { client } from "@/sanity/lib/client";
 import NoProductAvailable from "./NoProductAvailable";
 import { Loader2 } from "lucide-react";
 import Container from "./Container";
@@ -11,23 +10,39 @@ import HomeTabbar from "./HomeTabbar";
 import { Category, Product } from "@/sanity.types";
 import { fetchWithRetry } from "@/sanity/lib/fetchWithRetry";
 
-type HomeCategory = Pick<Category, "_id" | "title" | "slug">;
+type HomeCategory = Pick<Category, "_id" | "title" | "slug"> & {
+  productCount?: number;
+};
 
 const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const tabCategories = (categories || []).filter(
+  const categoriesWithSlug = (categories || []).filter(
     (category): category is HomeCategory & { slug: { current: string } } =>
       Boolean(category?._id && category?.title && category?.slug?.current)
   );
+
+  const tabCategories =
+    categoriesWithSlug.filter((category) => (category.productCount || 0) > 0)
+      .length > 0
+      ? categoriesWithSlug.filter((category) => (category.productCount || 0) > 0)
+      : categoriesWithSlug;
 
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     tabCategories[0]?._id || ""
   );
 
   useEffect(() => {
-    if (!selectedCategoryId && tabCategories.length) {
+    if (!tabCategories.length) {
+      setSelectedCategoryId("");
+      return;
+    }
+
+    if (
+      !selectedCategoryId ||
+      !tabCategories.some((category) => category._id === selectedCategoryId)
+    ) {
       setSelectedCategoryId(tabCategories[0]._id);
     }
   }, [selectedCategoryId, tabCategories]);
@@ -43,21 +58,21 @@ const ProductGrid = ({ categories }: { categories: HomeCategory[] }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const query = `*[_type == "product" && references($categoryId)] | order(name asc){
-  _id,
-  name,
-  slug,
-  images,
-  description,
-  price,
-  discount,
-  stock,
-  status,
-  "categories": categories[]->title
-}`;
-        const params = { categoryId: selectedCategoryId };
         const response = await fetchWithRetry(
-          () => client.fetch<Product[]>(query, params),
+          async () => {
+            const res = await fetch(
+              `/api/products/by-category?categoryId=${encodeURIComponent(selectedCategoryId)}`,
+              {
+                cache: "no-store",
+              }
+            );
+
+            if (!res.ok) {
+              throw new Error(`Failed to fetch products: ${res.status}`);
+            }
+
+            return (await res.json()) as Product[];
+          },
           { retries: 1, retryDelayMs: 400 }
         );
 
