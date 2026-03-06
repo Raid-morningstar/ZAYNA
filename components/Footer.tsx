@@ -84,7 +84,7 @@ const Footer = async () => {
         </div>
 
         <div className="py-5 border-t border-shop_light_green/20 text-center text-xs md:text-sm text-gray-600">
-          © {new Date().getFullYear()} Hey Para. Tous droits reserves.
+          © {new Date().getFullYear()} ZAYNA. Tous droits reserves.
         </div>
       </Container>
     </footer>
